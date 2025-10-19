@@ -1,6 +1,16 @@
-# ✅ Cloudflare Deployment Ready
+# ✅ Cloudflare Pages Deployment Ready
 
-This codebase has been cleaned up and prepared for Cloudflare Pages deployment.
+This codebase has been **rebuilt and optimized** for Cloudflare Pages deployment using npm and wrangler.
+
+## 🆕 Latest Updates
+
+### Rebuilt for Cloudflare (2025-10-19)
+- ✅ Created root `package.json` with deployment scripts
+- ✅ Fixed frontend `package.json` to use Vite (removed Next.js references)
+- ✅ Updated `wrangler.toml` for Pages deployment
+- ✅ Added `.node-version` file for Node.js version pinning
+- ✅ Simplified deployment to single command: `npm run deploy`
+- ✅ Updated all documentation with new workflow
 
 ## What Was Done
 
@@ -70,18 +80,23 @@ CORS_ORIGINS=https://your-frontend-url.pages.dev
 
 ## Quick Deployment Commands
 
-### Deploy Frontend to Cloudflare Pages
+### Deploy Frontend to Cloudflare Pages (New Simplified Method)
 ```bash
-cd frontend
-npm install
-npm run build
-wrangler login
-wrangler pages deploy build --project-name=smokehouse-miami
+# From project root
+npm install        # Installs frontend deps + wrangler
+npx wrangler login # Login to Cloudflare
+npm run deploy     # Build and deploy
+```
+
+### Alternative: Manual Deployment
+```bash
+npm run build      # Build only
+npx wrangler pages deploy frontend/build --project-name=smokehouse-miami-bbq
 ```
 
 ### Configure Environment Variables
 In Cloudflare Pages dashboard → Settings → Environment Variables:
-- Add `VITE_BACKEND_URL` with your backend URL
+- Add `VITE_BACKEND_URL` with your backend URL (no trailing slash)
 
 ### Deploy Backend (Choose One)
 

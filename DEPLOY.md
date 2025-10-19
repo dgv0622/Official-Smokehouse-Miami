@@ -70,20 +70,24 @@ git push heroku main
 ### 3. Deploy Frontend to Cloudflare Pages
 
 ```bash
-# Install Wrangler CLI
-npm install -g wrangler
+# From the root directory
+
+# Install dependencies (includes wrangler)
+npm install
 
 # Login to Cloudflare
-wrangler login
+npx wrangler login
 
-# Build and deploy frontend
-cd frontend
-npm install
-npm run build
-wrangler pages deploy build --project-name=smokehouse-miami
+# Build and deploy in one command
+npm run deploy
+
+# Or deploy to a specific project name
+npx wrangler pages deploy frontend/build --project-name=smokehouse-miami-bbq
 ```
 
-**Save your frontend URL** (e.g., `https://smokehouse-miami.pages.dev`)
+**Save your frontend URL** (e.g., `https://smokehouse-miami-bbq.pages.dev`)
+
+> **Note**: The root `package.json` now handles all build and deployment commands.
 
 ### 4. Connect Frontend to Backend
 
@@ -144,11 +148,21 @@ uvicorn server:app --reload --port 8000
 
 ### Frontend
 ```bash
+# From root directory
+npm install  # Installs frontend dependencies automatically
+npm run dev  # Starts Vite dev server on port 3000
+
+# Or manually from frontend directory
 cd frontend
-npm install
-# Create .env file with VITE_BACKEND_URL=http://localhost:8000
 npm run dev
 ```
+
+> **Tip**: The root `package.json` includes convenience scripts:
+> - `npm install` - Installs all frontend dependencies
+> - `npm run dev` - Starts development server
+> - `npm run build` - Builds for production
+> - `npm run preview` - Preview production build locally
+> - `npm run deploy` - Build and deploy to Cloudflare Pages
 
 ## Production Checklist
 
@@ -171,10 +185,13 @@ To add a custom domain:
 
 ## Deployment Files
 
+- `package.json` - Root configuration with build and deployment scripts
 - `wrangler.toml` - Cloudflare Pages configuration
+- `.node-version` - Node.js version specification for Cloudflare Pages
 - `backend/requirements.txt` - Python dependencies
 - `backend/Procfile` - Heroku configuration
 - `backend/railway.toml` - Railway configuration
+- `frontend/package.json` - Frontend dependencies and scripts
 - `frontend/.env.example` - Frontend environment variables template
 
 ## Getting Help

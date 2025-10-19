@@ -59,25 +59,30 @@ A modern, full-stack web application for a Miami-based BBQ catering business fea
 - Python 3.11+
 - MongoDB instance (local or Atlas)
 
-### Frontend Setup
+### Quick Start
+
+**Frontend Setup (from root directory)**
 ```bash
-cd frontend
+# Install all dependencies
 npm install
-cp .env.example .env
-# Edit .env and set VITE_BACKEND_URL=http://localhost:8000
+
+# Start development server
 npm run dev
 ```
 
 Frontend will be available at http://localhost:3000
 
-### Backend Setup
+**Backend Setup**
 ```bash
 cd backend
 pip install -r requirements.txt
+
 # Create .env file with:
 # MONGO_URL=your-mongodb-connection-string
 # DB_NAME=smokehouse
 # CORS_ORIGINS=http://localhost:3000
+
+# Start backend server
 uvicorn server:app --reload --port 8000
 ```
 
@@ -95,8 +100,19 @@ See [DEPLOY.md](./DEPLOY.md) for complete deployment instructions.
 **Quick Summary:**
 1. Deploy backend to Railway, Heroku, or Render
 2. Setup MongoDB Atlas (free tier)
-3. Deploy frontend to Cloudflare Pages
-4. Configure environment variables
+3. Deploy frontend to Cloudflare Pages:
+   ```bash
+   npm install
+   npm run deploy
+   ```
+4. Configure environment variables in Cloudflare dashboard
+
+**Key Features of This Setup:**
+- ✅ Root `package.json` manages build and deployment
+- ✅ Simple `npm run deploy` command for Cloudflare Pages
+- ✅ Wrangler included as dev dependency
+- ✅ Node version pinned with `.node-version` file
+- ✅ Clean separation between frontend and deployment configs
 
 ## Environment Variables
 
@@ -128,15 +144,28 @@ CORS_ORIGINS=https://your-frontend-url.pages.dev
 
 ## Scripts
 
-### Frontend
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+### Root Level (npm)
+- `npm install` - Install all dependencies (frontend + wrangler)
+- `npm run dev` - Start Vite development server
+- `npm run build` - Build frontend for production
+- `npm run preview` - Preview production build locally with wrangler
+- `npm run deploy` - Build and deploy to Cloudflare Pages
+- `npm run cf-typegen` - Generate Cloudflare types
+
+### Frontend Only
+```bash
+cd frontend
+npm run dev     # Start Vite dev server
+npm run build   # Build for production
+npm run lint    # Run ESLint
+```
 
 ### Backend
-- `uvicorn server:app --reload` - Start development server
-- `pytest` - Run tests
+```bash
+cd backend
+uvicorn server:app --reload  # Start development server
+pytest                        # Run tests
+```
 
 ## Contributing
 
