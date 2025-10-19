@@ -23,7 +23,7 @@ The Smokehouse Miami BBQ website has been successfully rebuilt for Cloudflare Pa
 │   ├── 📁 src/                  ← React application source
 │   ├── 📁 build/                ← ✅ Production build (488KB)
 │   │   ├── index.html
-│   │   ├── assets/              ← JS & CSS bundles
+│   │   ├── assets/              ← JS & CSS files
 │   │   ├── favicon.ico
 │   │   └── ...
 │   └── 📁 node_modules/         ← Frontend dependencies
@@ -131,8 +131,8 @@ Your website retains all original functionality:
 ✅ Output Directory: frontend/build/
 ✅ Assets Generated:
    - index.html (1.95 kB)
-   - CSS bundle (90.45 kB / 14.38 kB gzip)
-   - JS bundle (376.44 kB / 116.10 kB gzip)
+   - CSS output (90.45 kB / 14.38 kB gzip)
+   - JS output (376.44 kB / 116.10 kB gzip)
    - Static assets (favicon, robots.txt, etc.)
 ```
 
