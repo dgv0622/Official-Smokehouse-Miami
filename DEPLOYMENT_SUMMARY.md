@@ -118,7 +118,7 @@ All original website features are preserved:
 
 ### Build Output
 - `frontend/build/index.html` - Main HTML file
-- `frontend/build/assets/` - JS and CSS bundles
+- `frontend/build/assets/` - JS and CSS files
 - `frontend/build/favicon.ico` - Site icon
 - `frontend/build/robots.txt` - SEO configuration
 
