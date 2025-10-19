@@ -1,0 +1,14 @@
+{
+  "name": "smokehouse-pages-deploy",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "install:frontend": "cd frontend && npm ci || npm install",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run pages:dev",
+    "deploy": "wrangler pages deploy --project-name=smokehouse-miami-bbq --branch=$(git rev-parse --abbrev-ref HEAD)"
+  },
+  "devDependencies": {
+    "wrangler": "^3.100.0"
+  }
+}
