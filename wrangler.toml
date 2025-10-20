@@ -3,7 +3,7 @@
 
 name = "smokehouse-miami-bbq"
 compatibility_date = "2024-01-01"
-directory = "frontend/build"
+pages_build_output_dir = "frontend/build"
 
 # Environment variables (configure these in Cloudflare Pages dashboard)
 # VITE_BACKEND_URL = "https://your-backend-url.com"
