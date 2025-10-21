@@ -20,6 +20,10 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# N8N Configuration
+N8N_WEBHOOK_URL = os.environ.get('N8N_WEBHOOK_URL', 'https://primary-production-b41db.up.railway.app/')
+N8N_API_KEY = os.environ.get('N8N_API_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MWU1Zjk4Ny0xMzE3LTQ1NGEtYTAwMy0wOWRjZGZhYzZkZTciLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYxMDU3NDMxfQ.uqCDj2b40-XJpBFrj-6RZGdDobShurS0ItS6RvozZRU')
+
 # Create the main app without a prefix
 app = FastAPI()
 
@@ -106,18 +110,18 @@ async def send_chat_message(message_data: ChatMessageSend):
     )
     await db.chat_messages.insert_one(user_message.dict())
     
-    # Get n8n webhook URL
-    config = await db.n8n_config.find_one({})
-    webhook_url = config.get("webhook_url") if config else None
-    
     bot_response_text = ""
     
-    if webhook_url:
+    if N8N_WEBHOOK_URL:
         try:
             # Send to n8n workflow
+            headers = {
+                "X-N8N-API-KEY": N8N_API_KEY
+            }
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
-                    webhook_url,
+                    N8N_WEBHOOK_URL,
+                    headers=headers,
                     json={
                         "session_id": message_data.session_id,
                         "user_name": session.get("user_name"),
