@@ -1,6 +1,7 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -11,13 +12,20 @@ import uuid
 from datetime import datetime
 import httpx
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+from contextlib import asynccontextmanager
+
 
 
 # n8n configuration (read from environment)
-# If no DB-stored webhook is found, the server will fall back to this env var.
+# Legacy full URL support for existing /api/chat/message route
 N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL")
+
+# Strict env usage for new /chat and /chat/ping routes
+N8N_URL = os.environ.get("N8N_URL")
+N8N_WEBHOOK_PATH = os.environ.get("N8N_WEBHOOK_PATH")
 N8N_API_KEY = os.environ.get("N8N_API_KEY")
-# Optional: customize how the API key is sent
+
+# Optional: customize how the API key is sent (legacy behavior remains supported for /api/chat/message)
 # - Header name to use (default: X-N8N-API-KEY)
 N8N_API_KEY_HEADER_NAME = os.environ.get("N8N_API_KEY_HEADER_NAME", "X-N8N-API-KEY")
 # - If set, send API key as a query parameter with this name (takes precedence over header)
@@ -27,10 +35,32 @@ N8N_API_KEY_QUERY_PARAM = os.environ.get("N8N_API_KEY_QUERY_PARAM")
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# MongoDB connection (prefer MONGO_URI, fallback to legacy MONGO_URL/DB_NAME)
+MONGO_URI = os.environ.get("MONGO_URI") or os.environ.get("MONGO_URL")
+DB_NAME = os.environ.get("DB_NAME")
+client = None
+db = None
+try:
+    if MONGO_URI:
+        # Fast fail server selection to avoid long startup hangs
+        client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=1000)
+        if DB_NAME:
+            db = client[DB_NAME]
+        else:
+            # If DB name is encoded in the URI, get_default_database returns it; else remains None
+            try:
+                db = client.get_default_database()
+            except Exception:
+                db = None
+    else:
+        logging.getLogger(__name__).warning("MONGO_URI is not set; continuing without database")
+except Exception as e:
+    logging.getLogger(__name__).warning(f"Failed to initialize Mongo client: {e}")
+    client = None
+    db = None
+
+# Allow configuring allowed origins for Cloudflare Pages
+ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "https://*.pages.dev").split(",") if o.strip()]
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -218,17 +248,164 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan_context(app: FastAPI):
+    # Startup: ping Mongo quickly and log outcome, continue regardless
+    if client is not None:
+        try:
+            await client.admin.command("ping")
+            logger.info("MongoDB ping successful on startup")
+        except Exception as e:
+            logger.warning(f"MongoDB ping failed on startup: {e}")
+    yield
+    # Shutdown: close Mongo client
+    if client is not None:
+        client.close()
+
+
+# Replace app lifespan to include startup/shutdown logic
+app.router.lifespan_context = lifespan_context
+
 # Include the router in the main app
 app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
+
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
+        origin = request.headers.get("origin") or "-"
+        session_id_header = request.headers.get("x-session-id")
+        session_id_query = request.query_params.get("sessionId")
+        session_id = session_id_header or session_id_query or "-"
+        logger.info(
+            f"req {request_id} {request.method} {request.url.path} origin={origin} sid={session_id}"
+        )
+        response = await call_next(request)
+        logger.info(
+            f"res {request_id} {request.method} {request.url.path} status={response.status_code} sid={session_id}"
+        )
+        # Echo request id in response for traceability
+        response.headers["X-Request-ID"] = request_id
+        return response
+
+
+app.add_middleware(RequestLoggingMiddleware)
+
+
+def _n8n_headers() -> dict:
+    headers: dict = {}
+    if N8N_API_KEY:
+        headers[N8N_API_KEY_HEADER_NAME] = N8N_API_KEY
+    return headers
+
+
+def _normalize_webhook_path(path: Optional[str]) -> Optional[str]:
+    if not path:
+        return None
+    p = path.strip().lstrip("/")
+    # Disallow webhook-test; strip any accidental prefixes
+    if p.startswith("webhook-test/"):
+        logger.warning("N8N_WEBHOOK_PATH appears to use test webhook. Use production path without 'webhook-test/'.")
+        p = p[len("webhook-test/"):]
+    if p.startswith("webhook/"):
+        p = p[len("webhook/"):]
+    return p
+
+
+@app.get("/health")
+async def health():
+    version = os.getenv("RAILWAY_GIT_COMMIT_SHA") or os.getenv("GIT_SHA") or "dev"
+    return {"ok": True, "version": version}
+
+
+@app.get("/chat/ping")
+async def chat_ping():
+    if not N8N_URL:
+        # Missing configuration
+        detail = {"code": "ERR_N8N_CONFIG", "error": "N8N_URL not configured"}
+        raise HTTPException(status_code=500, detail=detail)
+
+    url = f"{N8N_URL.rstrip('/')}/rest/ping"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as hc:
+            r = await hc.get(url, headers=_n8n_headers())
+            content_type = r.headers.get("content-type", "")
+            body = r.json() if "application/json" in content_type else (r.text or "")
+            logger.info(f"n8n ping status={r.status_code} body={(str(body)[:200])}")
+            return {"n8n": body, "status": r.status_code}
+    except httpx.TimeoutException:
+        logger.error("ERR_N8N_TIMEOUT during /chat/ping")
+        detail = {"code": "ERR_N8N_TIMEOUT", "error": "Timeout contacting n8n"}
+        raise HTTPException(status_code=504, detail=detail)
+    except Exception as e:
+        logger.error(f"ERR_N8N_PING: {e}")
+        detail = {"code": "ERR_N8N_PING", "error": str(e)}
+        raise HTTPException(status_code=502, detail=detail)
+
+
+@app.post("/chat")
+async def chat(request: Request):
+    # Validate input
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail={"code": "ERR_BAD_REQUEST", "error": "Invalid JSON"})
+
+    message = (payload.get("message") or "").strip() if isinstance(payload, dict) else ""
+    if not message:
+        raise HTTPException(status_code=400, detail={"code": "ERR_BAD_REQUEST", "error": "'message' is required"})
+
+    # Build n8n production webhook URL
+    normalized_path = _normalize_webhook_path(N8N_WEBHOOK_PATH)
+    if not N8N_URL or not normalized_path:
+        raise HTTPException(status_code=500, detail={"code": "ERR_N8N_CONFIG", "error": "N8N_URL or N8N_WEBHOOK_PATH not configured"})
+
+    n8n_url = f"{N8N_URL.rstrip('/')}/webhook/{normalized_path}"
+
+    # Prepare body and headers
+    out_body = dict(payload)
+    out_body["receivedAt"] = datetime.utcnow().isoformat()
+    headers = {"Content-Type": "application/json"}
+    headers.update(_n8n_headers())
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as hc:
+            r = await hc.post(n8n_url, json=out_body, headers=headers)
+            content_type = r.headers.get("content-type", "")
+            if r.status_code >= 400:
+                body_text = r.text[:500] if isinstance(r.text, str) else str(r.text)[:500]
+                code = f"ERR_N8N_{r.status_code}"
+                logger.error(f"{code} upstream_status={r.status_code} body={body_text}")
+                raise HTTPException(
+                    status_code=502,
+                    detail={"error": "UPSTREAM_N8N", "code": code, "status": r.status_code, "body": body_text},
+                )
+
+            # Success: passthrough JSON or text
+            if "application/json" in content_type:
+                return r.json()
+            return {"text": r.text}
+    except httpx.TimeoutException:
+        logger.error("ERR_N8N_TIMEOUT during /chat")
+        raise HTTPException(status_code=504, detail={"error": "N8N_TIMEOUT", "code": "ERR_N8N_TIMEOUT", "message": "n8n request timed out"})
+    except HTTPException:
+        # Already logged above
+        raise
+    except Exception as e:
+        logger.error(f"ERR_N8N_UNEXPECTED during /chat: {e}")
+        raise HTTPException(status_code=502, detail={"error": "ERR_N8N_UNEXPECTED", "message": str(e)})
+
+# Retain shutdown hook for compatibility; connection is also closed via lifespan
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if client is not None:
+        client.close()
