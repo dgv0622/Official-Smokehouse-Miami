@@ -11,7 +11,9 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 const ChatConfig = () => {
   const [webhookUrl, setWebhookUrl] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const [currentWebhookUrl, setCurrentWebhookUrl] = useState('');
+  const [currentApiKey, setCurrentApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
@@ -31,6 +33,10 @@ const ChatConfig = () => {
           setCurrentWebhookUrl(data.webhook_url);
           setWebhookUrl(data.webhook_url);
         }
+        if (data.api_key) {
+          setCurrentApiKey(data.api_key);
+          setApiKey(data.api_key);
+        }
       }
     } catch (error) {
       console.error('Error loading config:', error);
@@ -46,21 +52,25 @@ const ChatConfig = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!webhookUrl.trim()) return;
+    if (!webhookUrl.trim() || !apiKey.trim()) return;
 
     setIsSaving(true);
     try {
       const response = await fetch(`${BACKEND_URL}/api/chat/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ webhook_url: webhookUrl }),
+        body: JSON.stringify({ 
+          webhook_url: webhookUrl,
+          api_key: apiKey 
+        }),
       });
 
       if (response.ok) {
         setCurrentWebhookUrl(webhookUrl);
+        setCurrentApiKey(apiKey);
         toast({
           title: 'Success!',
-          description: 'n8n webhook URL has been updated',
+          description: 'n8n configuration has been updated',
         });
       } else {
         throw new Error('Failed to update configuration');
@@ -123,6 +133,24 @@ const ChatConfig = () => {
                   />
                 </div>
 
+                <div>
+                  <Label htmlFor="api-key" className="text-lg">
+                    n8n API Key
+                  </Label>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Enter your n8n API key for authentication. This will be sent in the X-N8N-API-KEY header.
+                  </p>
+                  <Input
+                    id="api-key"
+                    type="password"
+                    placeholder="Enter your n8n API key"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    required
+                    className="mt-1"
+                  />
+                </div>
+
                 {currentWebhookUrl && (
                   <div className="bg-muted p-4 rounded-lg">
                     <div className="flex items-start gap-2">
@@ -130,8 +158,13 @@ const ChatConfig = () => {
                       <div className="flex-1">
                         <p className="font-medium">Currently Configured</p>
                         <p className="text-sm text-muted-foreground break-all mt-1">
-                          {currentWebhookUrl}
+                          <strong>Webhook URL:</strong> {currentWebhookUrl}
                         </p>
+                        {currentApiKey && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            <strong>API Key:</strong> {currentApiKey.substring(0, 20)}...{currentApiKey.substring(currentApiKey.length - 10)}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -166,7 +199,7 @@ const ChatConfig = () => {
                 <Button
                   type="submit"
                   className="w-full h-12 bg-gradient-to-r from-[#FF2D55] via-[#FF1744] to-[#E91E63] hover:shadow-lg hover:shadow-[#FF2D55]/50 transition-all duration-300 rounded-xl font-semibold"
-                  disabled={isSaving || !webhookUrl.trim()}
+                  disabled={isSaving || !webhookUrl.trim() || !apiKey.trim()}
                 >
                   {isSaving ? (
                     <>
