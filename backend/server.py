@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -13,30 +13,213 @@ import httpx
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 
-# n8n configuration (read from environment)
-# If no DB-stored webhook is found, the server will fall back to this env var.
-N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL")
-N8N_API_KEY = os.environ.get("N8N_API_KEY")
-# Optional: customize how the API key is sent
-# - Header name to use (default: X-N8N-API-KEY)
-N8N_API_KEY_HEADER_NAME = os.environ.get("N8N_API_KEY_HEADER_NAME", "X-N8N-API-KEY")
-# - If set, send API key as a query parameter with this name (takes precedence over header)
-N8N_API_KEY_QUERY_PARAM = os.environ.get("N8N_API_KEY_QUERY_PARAM")
-
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Configure logging (MUST be before routes that use logger)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# n8n configuration (read from environment)
+# New structure: separate base URL and webhook path
+N8N_URL = os.environ.get("N8N_URL", "")  # e.g., https://n8n.railway.app
+N8N_WEBHOOK_PATH = os.environ.get("N8N_WEBHOOK_PATH", "")  # e.g., my-webhook-path
+N8N_API_KEY = os.environ.get("N8N_API_KEY")
+# Backward compatibility: support old N8N_WEBHOOK_URL if new vars not set
+N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL")
+
+if not N8N_URL and N8N_WEBHOOK_URL:
+    logger.warning("Using deprecated N8N_WEBHOOK_URL. Please set N8N_URL and N8N_WEBHOOK_PATH instead.")
+
+# MongoDB connection with error handling
+try:
+    # Support both MONGO_URI (preferred) and MONGO_URL (legacy)
+    mongo_uri = os.environ.get('MONGO_URI') or os.environ.get('MONGO_URL')
+    if not mongo_uri:
+        raise ValueError("MONGO_URI or MONGO_URL environment variable is required")
+    
+    client = AsyncIOMotorClient(mongo_uri)
+    db = client[os.environ.get('DB_NAME', 'bbq_catering')]
+    logger.info("MongoDB client initialized")
+except Exception as e:
+    logger.error(f"Failed to initialize MongoDB: {e}")
+    # Don't crash the server, but log the error
+    client = None
+    db = None
 
 # Create the main app without a prefix
 app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+
+
+# ============================================================================
+# HEALTH & CONNECTIVITY ROUTES (no /api prefix)
+# ============================================================================
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint - returns server status and version"""
+    return {
+        "ok": True,
+        "version": os.environ.get("RAILWAY_GIT_COMMIT_SHA", "dev"),
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
+@app.get("/chat/ping")
+async def chat_ping():
+    """Test n8n connectivity via REST API ping"""
+    if not N8N_URL:
+        return {
+            "error": "N8N_URL not configured",
+            "status": 500
+        }
+    
+    headers = {}
+    if N8N_API_KEY:
+        headers["X-N8N-API-KEY"] = N8N_API_KEY
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            response = await http_client.get(
+                f"{N8N_URL}/rest/ping",
+                headers=headers
+            )
+            
+            # Parse response
+            try:
+                body = response.json()
+            except Exception:
+                body = response.text
+            
+            logger.info(f"n8n ping response: status={response.status_code}")
+            
+            return {
+                "status": response.status_code,
+                "n8n": body
+            }
+    except httpx.TimeoutException:
+        logger.error("n8n ping timeout")
+        return {"error": "N8N_TIMEOUT", "status": 504}
+    except Exception as e:
+        logger.error(f"n8n ping error: {e}")
+        return {"error": str(e), "status": 500}
+
+
+@app.post("/chat")
+async def chat(request: Request):
+    """
+    Direct chat endpoint that forwards messages to n8n webhook.
+    This is the production endpoint for the chatbot.
+    
+    Expected payload: {
+        \"message\": \"user message\",
+        \"sessionId\": \"optional-session-id\",
+        ...any other fields to forward
+    }
+    """
+    try:
+        payload = await request.json()
+    except Exception as e:
+        logger.error(f"Invalid JSON payload: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "INVALID_JSON", "message": "Request body must be valid JSON"}
+        )
+    
+    # Validate required fields
+    message = payload.get("message", "").strip()
+    if not message:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "MISSING_MESSAGE", "message": "message field is required and cannot be empty"}
+        )
+    
+    # Build n8n webhook URL
+    if N8N_URL and N8N_WEBHOOK_PATH:
+        webhook_url = f"{N8N_URL}/webhook/{N8N_WEBHOOK_PATH}"
+    elif N8N_WEBHOOK_URL:
+        # Backward compatibility
+        webhook_url = N8N_WEBHOOK_URL
+    else:
+        logger.error("n8n webhook not configured: N8N_URL and N8N_WEBHOOK_PATH required")
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "N8N_NOT_CONFIGURED", "message": "n8n webhook is not configured"}
+        )
+    
+    # Add server metadata
+    payload["receivedAt"] = datetime.utcnow().isoformat()
+    
+    # Prepare headers
+    headers = {"Content-Type": "application/json"}
+    if N8N_API_KEY:
+        headers["X-N8N-API-KEY"] = N8N_API_KEY
+    
+    # Log the request
+    session_id = payload.get("sessionId", "unknown")
+    logger.info(f"Forwarding chat message to n8n: session={session_id}, message_len={len(message)}")
+    
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as http_client:
+            response = await http_client.post(
+                webhook_url,
+                json=payload,
+                headers=headers
+            )
+            
+            # Log response
+            logger.info(f"n8n response: status={response.status_code}")
+            
+            # Handle non-2xx responses
+            if response.status_code >= 400:
+                error_body = response.text[:500]
+                logger.error(
+                    f"n8n upstream error: status={response.status_code}, "
+                    f"body={error_body}"
+                )
+                raise HTTPException(
+                    status_code=502,
+                    detail={
+                        "code": "UPSTREAM_N8N",
+                        "message": "n8n webhook returned an error",
+                        "status": response.status_code,
+                        "body": error_body
+                    }
+                )
+            
+            # Parse successful response
+            content_type = response.headers.get("content-type", "")
+            if "application/json" in content_type:
+                return response.json()
+            else:
+                return {"text": response.text}
+                
+    except httpx.TimeoutException:
+        logger.exception("n8n request timeout")
+        raise HTTPException(
+            status_code=504,
+            detail={"code": "N8N_TIMEOUT", "message": "Request to n8n timed out after 20 seconds"}
+        )
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.exception(f"Unexpected error calling n8n: {e}")
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "N8N_ERROR", "message": f"Error communicating with n8n: {str(e)}"}
+        )
+
+
+# ============================================================================
+# API ROUTES (with /api prefix)
+# ============================================================================
 
 
 # Define Models
@@ -211,24 +394,51 @@ async def update_n8n_config(config_data: N8nConfigUpdate):
     logger.info("Updated n8n webhook URL")
     return {"message": "Configuration updated successfully", "webhook_url": config_data.webhook_url}
 
-# Configure logging (before routes that use logger)
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
 # Include the router in the main app
 app.include_router(api_router)
+
+# CORS Configuration
+ALLOWED_ORIGINS = os.environ.get(
+    'ALLOWED_ORIGINS',
+    'https://*.pages.dev,http://localhost:3000'
+).split(',')
 
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
+    allow_origins=[origin.strip() for origin in ALLOWED_ORIGINS],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
+# Middleware for request logging
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    request_id = str(uuid.uuid4())[:8]
+    logger.info(
+        f"[{request_id}] {request.method} {request.url.path} "
+        f"origin={request.headers.get('origin', 'unknown')}"
+    )
+    response = await call_next(request)
+    logger.info(f"[{request_id}] Response status={response.status_code}")
+    return response
+
+@app.on_event("startup")
+async def startup_db_client():
+    """Validate MongoDB connection on startup"""
+    if client:
+        try:
+            # Quick ping test with 1s timeout
+            await client.admin.command('ping', serverSelectionTimeoutMS=1000)
+            logger.info("✅ MongoDB connection validated successfully")
+        except Exception as e:
+            logger.warning(f"⚠️ MongoDB connection validation failed: {e}")
+            logger.warning("Server will continue but database operations may fail")
+    else:
+        logger.warning("⚠️ MongoDB client not initialized")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if client:
+        client.close()
+        logger.info("MongoDB client closed")
