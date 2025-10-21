@@ -65,9 +65,11 @@ class ChatMessageSend(BaseModel):
 
 class N8nConfig(BaseModel):
     webhook_url: Optional[str] = None
+    api_key: Optional[str] = None
 
 class N8nConfigUpdate(BaseModel):
     webhook_url: str
+    api_key: str
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
@@ -111,9 +113,10 @@ async def send_chat_message(message_data: ChatMessageSend):
     )
     await db.chat_messages.insert_one(user_message.dict())
     
-    # Get n8n webhook URL
+    # Get n8n webhook URL and API key from config
     config = await db.n8n_config.find_one({})
     webhook_url = (config.get("webhook_url") if (config and config.get("webhook_url")) else N8N_WEBHOOK_URL)
+    api_key = (config.get("api_key") if (config and config.get("api_key")) else N8N_API_KEY)
     
     bot_response_text = ""
     
@@ -121,7 +124,7 @@ async def send_chat_message(message_data: ChatMessageSend):
         try:
             # Send to n8n workflow
             async with httpx.AsyncClient(timeout=30.0) as client:
-                headers = {"X-N8N-API-KEY": N8N_API_KEY}
+                headers = {"X-N8N-API-KEY": api_key} if api_key else {}
                 response = await client.post(
                     webhook_url,
                     json={
@@ -171,18 +174,28 @@ async def get_chat_messages(session_id: str):
 async def get_n8n_config():
     """Get the current n8n webhook configuration"""
     config = await db.n8n_config.find_one({})
-    if config and config.get("webhook_url"):
-        return N8nConfig(webhook_url=config.get("webhook_url"))
-    return N8nConfig(webhook_url=N8N_WEBHOOK_URL)
+    if config:
+        return N8nConfig(
+            webhook_url=config.get("webhook_url", N8N_WEBHOOK_URL),
+            api_key=config.get("api_key", N8N_API_KEY)
+        )
+    return N8nConfig(webhook_url=N8N_WEBHOOK_URL, api_key=N8N_API_KEY)
 
 @api_router.put("/chat/config")
 async def update_n8n_config(config_data: N8nConfigUpdate):
-    """Update the n8n webhook URL"""
+    """Update the n8n webhook URL and API key"""
     # Delete existing config and insert new one
     await db.n8n_config.delete_many({})
-    await db.n8n_config.insert_one({"webhook_url": config_data.webhook_url})
-    logger.info("Updated n8n webhook URL")
-    return {"message": "Configuration updated successfully", "webhook_url": config_data.webhook_url}
+    await db.n8n_config.insert_one({
+        "webhook_url": config_data.webhook_url,
+        "api_key": config_data.api_key
+    })
+    logger.info("Updated n8n webhook URL and API key")
+    return {
+        "message": "Configuration updated successfully",
+        "webhook_url": config_data.webhook_url,
+        "api_key": config_data.api_key
+    }
 
 # Configure logging (before routes that use logger)
 logging.basicConfig(

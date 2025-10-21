@@ -105,7 +105,7 @@ class ChatbotAPITester:
             self.log_test(test_name, False, "Request failed", str(e))
     
     def test_get_n8n_config_initial(self):
-        """Test getting n8n config (should be empty initially)"""
+        """Test getting n8n config (should have default values)"""
         test_name = "Get n8n Config - Initial State"
         
         try:
@@ -113,10 +113,10 @@ class ChatbotAPITester:
             
             if response.status_code == 200:
                 data = response.json()
-                if "webhook_url" in data and data["webhook_url"] is None:
-                    self.log_test(test_name, True, "Config retrieved, webhook_url is null as expected")
+                if "webhook_url" in data and "api_key" in data:
+                    self.log_test(test_name, True, "Config retrieved", f"Current webhook_url: {data.get('webhook_url')}, API Key present: {bool(data.get('api_key'))}")
                 else:
-                    self.log_test(test_name, True, "Config retrieved", f"Current webhook_url: {data.get('webhook_url')}")
+                    self.log_test(test_name, False, "Missing required fields in config", str(data))
             else:
                 self.log_test(test_name, False, f"HTTP {response.status_code}", response.text)
                 
@@ -124,20 +124,21 @@ class ChatbotAPITester:
             self.log_test(test_name, False, "Request failed", str(e))
     
     def test_update_n8n_config(self):
-        """Test updating n8n webhook URL"""
+        """Test updating n8n webhook URL and API key"""
         test_name = "Update n8n Config"
         
         try:
             payload = {
-                "webhook_url": "https://test.n8n.io/webhook/test"
+                "webhook_url": "https://test.n8n.io/webhook/test",
+                "api_key": "test-api-key-12345"
             }
             
             response = requests.put(f"{self.base_url}/chat/config", json=payload, timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
-                if "message" in data and "webhook_url" in data:
-                    self.log_test(test_name, True, "Config updated successfully", f"New URL: {data['webhook_url']}")
+                if "message" in data and "webhook_url" in data and "api_key" in data:
+                    self.log_test(test_name, True, "Config updated successfully", f"New URL: {data['webhook_url']}, API Key: {data['api_key'][:10]}...")
                 else:
                     self.log_test(test_name, False, "Unexpected response format", str(data))
             else:
@@ -156,10 +157,11 @@ class ChatbotAPITester:
             if response.status_code == 200:
                 data = response.json()
                 expected_url = "https://test.n8n.io/webhook/test"
-                if data.get("webhook_url") == expected_url:
-                    self.log_test(test_name, True, "Config retrieved with correct webhook URL")
+                expected_api_key = "test-api-key-12345"
+                if data.get("webhook_url") == expected_url and data.get("api_key") == expected_api_key:
+                    self.log_test(test_name, True, "Config retrieved with correct webhook URL and API key")
                 else:
-                    self.log_test(test_name, False, f"Expected {expected_url}, got {data.get('webhook_url')}")
+                    self.log_test(test_name, False, f"Expected URL: {expected_url}, got {data.get('webhook_url')}; Expected API Key: {expected_api_key}, got {data.get('api_key')}")
             else:
                 self.log_test(test_name, False, f"HTTP {response.status_code}", response.text)
                 
