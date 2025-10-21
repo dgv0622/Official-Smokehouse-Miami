@@ -60,7 +60,8 @@ except Exception as e:
     db = None
 
 # Allow configuring allowed origins for Cloudflare Pages
-ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "https://*.pages.dev").split(",") if o.strip()]
+ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+ALLOWED_ORIGIN_REGEX = os.environ.get("ALLOWED_ORIGIN_REGEX", r"https://.*\\.pages\\.dev$")
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -274,6 +275,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
