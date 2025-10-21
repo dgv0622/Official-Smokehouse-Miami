@@ -12,6 +12,11 @@ from datetime import datetime
 import httpx
 
 
+# n8n configuration
+N8N_WEBHOOK_URL = "https://primary-production-b41db.up.railway.app/"
+N8N_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MWU1Zjk4Ny0xMzE3LTQ1NGEtYTAwMy0wOWRjZGZhYzZkZTciLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYxMDU3NDMxfQ.uqCDj2b40-XJpBFrj-6RZGdDobShurS0ItS6RvozZRU"
+
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -108,7 +113,7 @@ async def send_chat_message(message_data: ChatMessageSend):
     
     # Get n8n webhook URL
     config = await db.n8n_config.find_one({})
-    webhook_url = config.get("webhook_url") if config else None
+    webhook_url = (config.get("webhook_url") if (config and config.get("webhook_url")) else N8N_WEBHOOK_URL)
     
     bot_response_text = ""
     
@@ -116,6 +121,7 @@ async def send_chat_message(message_data: ChatMessageSend):
         try:
             # Send to n8n workflow
             async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"X-N8N-API-KEY": N8N_API_KEY}
                 response = await client.post(
                     webhook_url,
                     json={
@@ -124,7 +130,8 @@ async def send_chat_message(message_data: ChatMessageSend):
                         "user_email": session.get("user_email"),
                         "message": message_data.message,
                         "timestamp": datetime.utcnow().isoformat()
-                    }
+                    },
+                    headers=headers
                 )
                 response.raise_for_status()
                 
@@ -164,9 +171,9 @@ async def get_chat_messages(session_id: str):
 async def get_n8n_config():
     """Get the current n8n webhook configuration"""
     config = await db.n8n_config.find_one({})
-    if config:
+    if config and config.get("webhook_url"):
         return N8nConfig(webhook_url=config.get("webhook_url"))
-    return N8nConfig(webhook_url=None)
+    return N8nConfig(webhook_url=N8N_WEBHOOK_URL)
 
 @api_router.put("/chat/config")
 async def update_n8n_config(config_data: N8nConfigUpdate):
