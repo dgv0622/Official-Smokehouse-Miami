@@ -10,11 +10,18 @@ from typing import List, Optional
 import uuid
 from datetime import datetime
 import httpx
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 
-# n8n configuration
-N8N_WEBHOOK_URL = "https://primary-production-b41db.up.railway.app/"
-N8N_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MWU1Zjk4Ny0xMzE3LTQ1NGEtYTAwMy0wOWRjZGZhYzZkZTciLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYxMDU3NDMxfQ.uqCDj2b40-XJpBFrj-6RZGdDobShurS0ItS6RvozZRU"
+# n8n configuration (read from environment)
+# If no DB-stored webhook is found, the server will fall back to this env var.
+N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL")
+N8N_API_KEY = os.environ.get("N8N_API_KEY")
+# Optional: customize how the API key is sent
+# - Header name to use (default: X-N8N-API-KEY)
+N8N_API_KEY_HEADER_NAME = os.environ.get("N8N_API_KEY_HEADER_NAME", "X-N8N-API-KEY")
+# - If set, send API key as a query parameter with this name (takes precedence over header)
+N8N_API_KEY_QUERY_PARAM = os.environ.get("N8N_API_KEY_QUERY_PARAM")
 
 
 ROOT_DIR = Path(__file__).parent
@@ -121,9 +128,23 @@ async def send_chat_message(message_data: ChatMessageSend):
         try:
             # Send to n8n workflow
             async with httpx.AsyncClient(timeout=30.0) as client:
-                headers = {"X-N8N-API-KEY": N8N_API_KEY}
+                # Build URL and headers depending on how the API key should be passed
+                request_headers = {}
+                url_to_post = webhook_url
+
+                if N8N_API_KEY and N8N_API_KEY_QUERY_PARAM:
+                    # Append API key as query param
+                    parts = urlsplit(url_to_post)
+                    query_params = dict(parse_qsl(parts.query))
+                    query_params[N8N_API_KEY_QUERY_PARAM] = N8N_API_KEY
+                    new_query = urlencode(query_params, doseq=True)
+                    url_to_post = urlunsplit((parts.scheme, parts.netloc, parts.path, new_query, parts.fragment))
+                elif N8N_API_KEY:
+                    # Send API key in header (default)
+                    request_headers[N8N_API_KEY_HEADER_NAME] = N8N_API_KEY
+
                 response = await client.post(
-                    webhook_url,
+                    url_to_post,
                     json={
                         "session_id": message_data.session_id,
                         "user_name": session.get("user_name"),
@@ -131,15 +152,21 @@ async def send_chat_message(message_data: ChatMessageSend):
                         "message": message_data.message,
                         "timestamp": datetime.utcnow().isoformat()
                     },
-                    headers=headers
+                    headers=request_headers or None
                 )
                 response.raise_for_status()
-                
-                # Parse n8n response
-                n8n_response = response.json()
-                # Assuming n8n returns {"response": "bot message"} or similar
-                # Adjust this based on your n8n workflow output
-                bot_response_text = n8n_response.get("response") or n8n_response.get("message") or str(n8n_response)
+
+                # Parse n8n response (support JSON or plain text)
+                try:
+                    n8n_response = response.json()
+                    bot_response_text = (
+                        n8n_response.get("response")
+                        or n8n_response.get("message")
+                        or str(n8n_response)
+                    )
+                except ValueError:
+                    # Not JSON; use raw text
+                    bot_response_text = response.text.strip() or "(no response)"
                 
         except httpx.HTTPError as e:
             logger.error(f"Error calling n8n webhook: {e}")
