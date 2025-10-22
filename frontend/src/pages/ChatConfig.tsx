@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowLeft, Save, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const ChatConfig = () => {
   const [webhookUrl, setWebhookUrl] = useState('');
