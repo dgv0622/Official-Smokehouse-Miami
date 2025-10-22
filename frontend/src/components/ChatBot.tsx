@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { API_BASE_URL } from '@/lib/api';
 
 interface Message {
   id: string;
@@ -18,7 +19,6 @@ interface ChatSession {
   user_email: string;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +49,7 @@ const ChatBot = () => {
 
   const loadMessages = async (sessionId: string) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/chat/messages/${sessionId}`);
+      const response = await fetch(`${API_BASE_URL}/api/chat/messages/${sessionId}`);
       if (response.ok) {
         const data = await response.json();
         setMessages(data);
@@ -65,7 +65,7 @@ const ChatBot = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/chat/session`, {
+      const response = await fetch(`${API_BASE_URL}/api/chat/session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -112,7 +112,7 @@ const ChatBot = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/chat/message`, {
+      const response = await fetch(`${API_BASE_URL}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

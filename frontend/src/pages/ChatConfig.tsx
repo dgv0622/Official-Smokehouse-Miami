@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { API_BASE_URL } from '@/lib/api';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
 
 const ChatConfig = () => {
   const [webhookUrl, setWebhookUrl] = useState('');
@@ -24,7 +25,7 @@ const ChatConfig = () => {
   const loadConfig = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/chat/config`);
+      const response = await fetch(`${API_BASE_URL}/api/chat/config`);
       if (response.ok) {
         const data = await response.json();
         if (data.webhook_url) {
@@ -50,7 +51,7 @@ const ChatConfig = () => {
 
     setIsSaving(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/chat/config`, {
+      const response = await fetch(`${API_BASE_URL}/api/chat/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ webhook_url: webhookUrl }),
