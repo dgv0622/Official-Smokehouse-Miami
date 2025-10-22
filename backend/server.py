@@ -13,15 +13,31 @@ import httpx
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 
-# n8n configuration (read from environment)
-# If no DB-stored webhook is found, the server will fall back to this env var.
-N8N_WEBHOOK_URL = os.environ.get("https://webhook-processor-production-a91f.up.railway.app/webhook/985e88ec-2d95-4b9c-a43f-3a9846dcda55")
-N8N_API_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MWU1Zjk4Ny0xMzE3LTQ1NGEtYTAwMy0wOWRjZGZhYzZkZTciLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYxMDU3NDMxfQ.uqCDj2b40-XJpBFrj-6RZGdDobShurS0ItS6RvozZRU")
+# Configure logging first (before routes that use logger)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# n8n configuration
+# Default webhook URL and API key (can be overridden via environment variables)
+N8N_WEBHOOK_URL = os.environ.get(
+    "N8N_WEBHOOK_URL",
+    "https://webhook-processor-production-a91f.up.railway.app/webhook/985e88ec-2d95-4b9c-a43f-3a9846dcda55"
+)
+N8N_API_KEY = os.environ.get(
+    "N8N_API_KEY",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MWU1Zjk4Ny0xMzE3LTQ1NGEtYTAwMy0wOWRjZGZhYzZkZTciLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYxMDU3NDMxfQ.uqCDj2b40-XJpBFrj-6RZGdDobShurS0ItS6RvozZRU"
+)
 # Optional: customize how the API key is sent
 # - Header name to use (default: X-N8N-API-KEY)
 N8N_API_KEY_HEADER_NAME = os.environ.get("N8N_API_KEY_HEADER_NAME", "X-N8N-API-KEY")
 # - If set, send API key as a query parameter with this name (takes precedence over header)
 N8N_API_KEY_QUERY_PARAM = os.environ.get("N8N_API_KEY_QUERY_PARAM")
+
+logger.info(f"n8n webhook URL: {N8N_WEBHOOK_URL}")
+logger.info(f"n8n API key configured: {bool(N8N_API_KEY)}")
 
 
 ROOT_DIR = Path(__file__).parent
@@ -210,13 +226,6 @@ async def update_n8n_config(config_data: N8nConfigUpdate):
     await db.n8n_config.insert_one({"webhook_url": config_data.webhook_url})
     logger.info("Updated n8n webhook URL")
     return {"message": "Configuration updated successfully", "webhook_url": config_data.webhook_url}
-
-# Configure logging (before routes that use logger)
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 # Include the router in the main app
 app.include_router(api_router)
