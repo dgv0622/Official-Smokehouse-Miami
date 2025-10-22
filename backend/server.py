@@ -13,24 +13,80 @@ import httpx
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
 # n8n configuration (read from environment)
 # If no DB-stored webhook is found, the server will fall back to this env var.
-N8N_WEBHOOK_URL = os.environ.get("https://webhook-processor-production-a91f.up.railway.app/webhook/985e88ec-2d95-4b9c-a43f-3a9846dcda55")
-N8N_API_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MWU1Zjk4Ny0xMzE3LTQ1NGEtYTAwMy0wOWRjZGZhYzZkZTciLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzYxMDU3NDMxfQ.uqCDj2b40-XJpBFrj-6RZGdDobShurS0ItS6RvozZRU")
+N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL")
+N8N_API_KEY = os.environ.get("N8N_API_KEY")
 # Optional: customize how the API key is sent
 # - Header name to use (default: X-N8N-API-KEY)
 N8N_API_KEY_HEADER_NAME = os.environ.get("N8N_API_KEY_HEADER_NAME", "X-N8N-API-KEY")
 # - If set, send API key as a query parameter with this name (takes precedence over header)
 N8N_API_KEY_QUERY_PARAM = os.environ.get("N8N_API_KEY_QUERY_PARAM")
 
+# Database configuration with in-memory fallback (for local/tests)
+MONGO_URL = os.environ.get('MONGO_URL')
+DB_NAME = os.environ.get('DB_NAME', 'smokehouse')
+USE_IN_MEMORY_DB = os.environ.get('USE_IN_MEMORY_DB', '').lower() == 'true' or not MONGO_URL
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+client = None
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+if not USE_IN_MEMORY_DB:
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client[DB_NAME]
+else:
+    from typing import Any, Dict, Optional as OptDict
+
+    class InMemoryCursor:
+        def __init__(self, items):
+            self._items = list(items)
+
+        def sort(self, field: str, direction: int):
+            reverse = direction == -1
+            self._items.sort(key=lambda x: x.get(field), reverse=reverse)
+            return self
+
+        async def to_list(self, length: int):
+            return self._items[:length]
+
+    class InMemoryCollection:
+        def __init__(self):
+            self._items: list[Dict[str, Any]] = []
+
+        async def insert_one(self, doc: Dict[str, Any]):
+            self._items.append(dict(doc))
+            return None
+
+        async def find_one(self, filter: Dict[str, Any]):
+            for item in reversed(self._items):
+                if all(item.get(k) == v for k, v in filter.items()):
+                    return dict(item)
+            return None
+
+        def find(self, filter: OptDict[Dict[str, Any]] = None):
+            if not filter:
+                matched = list(self._items)
+            else:
+                matched = [i for i in self._items if all(i.get(k) == v for k, v in filter.items())]
+            return InMemoryCursor(matched)
+
+        async def delete_many(self, filter: Dict[str, Any]):
+            if not filter:
+                self._items.clear()
+                return None
+            self._items = [i for i in self._items if not all(i.get(k) == v for k, v in filter.items())]
+            return None
+
+    class InMemoryDB:
+        def __init__(self):
+            self.status_checks = InMemoryCollection()
+            self.chat_sessions = InMemoryCollection()
+            self.chat_messages = InMemoryCollection()
+            self.n8n_config = InMemoryCollection()
+
+    db = InMemoryDB()
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -231,4 +287,5 @@ app.add_middleware(
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if client is not None:
+        client.close()
