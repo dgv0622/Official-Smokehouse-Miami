@@ -143,7 +143,7 @@ Your website retains all original functionality:
 | Command | Description |
 |---------|-------------|
 | `npm install` | Install all dependencies (frontend + wrangler) |
-| `npm run dev` | Start development server (localhost:3000) |
+| `npm run dev` | Start development server |
 | `npm run build` | Build frontend for production |
 | `npm run preview` | Preview production build with wrangler |
 | `npm run deploy` | **Build + Deploy to Cloudflare Pages** |
@@ -305,10 +305,9 @@ npx wrangler pages deploy frontend/build --project-name=smokehouse-miami-bbq
 
 ## 💡 Pro Tips
 
-1. **Local Preview with Wrangler:**
+1. **Preview with Wrangler:**
    ```bash
    npm run preview
-   # Visit http://localhost:8788
    ```
 
 2. **View Deployment History:**

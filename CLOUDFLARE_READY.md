@@ -37,7 +37,7 @@ This codebase has been **rebuilt and optimized** for Cloudflare Pages deployment
 
 ### 🔧 Frontend Configuration
 - ✅ Updated API URL references to use `VITE_BACKEND_URL` environment variable
-- ✅ Added fallback to `localhost:8000` for development
+- ✅ Configured to point to deployed backend
 - ✅ Verified build configuration in `vite.config.ts`
 - ✅ Confirmed build output directory is `frontend/build`
 
