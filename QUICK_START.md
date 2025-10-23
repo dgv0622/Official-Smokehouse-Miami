@@ -52,10 +52,10 @@ See `DEPLOY.md` for backend deployment instructions.
 
 ```bash
 npm install    # Install all dependencies
-npm run dev    # Start local dev server (http://localhost:3000)
+npm run dev    # Start development server
 npm run build  # Build for production
 npm run deploy # Build + Deploy to Cloudflare Pages
-npm run preview # Preview build locally with wrangler
+npm run preview # Preview build with wrangler
 ```
 
 ## 🎯 Project Structure
@@ -104,10 +104,9 @@ npx wrangler pages deploy frontend/build --project-name=your-name-here
 npx wrangler pages deployment list
 ```
 
-### Local Preview
+### Preview Build
 ```bash
 npm run preview
-# Visit http://localhost:8788
 ```
 
 ## 🆘 Need Help?

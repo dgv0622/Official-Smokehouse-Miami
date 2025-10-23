@@ -66,11 +66,9 @@ A modern, full-stack web application for a Miami-based BBQ catering business fea
 # Install all dependencies
 npm install
 
-# Start development server
-npm run dev
+# Build frontend for production
+npm run build
 ```
-
-Frontend will be available at http://localhost:3000
 
 **Backend Setup**
 ```bash
@@ -80,18 +78,16 @@ pip install -r requirements.txt
 # Create .env file with:
 # MONGO_URL=your-mongodb-connection-string
 # DB_NAME=smokehouse
-# CORS_ORIGINS=http://localhost:3000
+# CORS_ORIGINS=https://your-frontend-url.pages.dev
 
 # Start backend server
 uvicorn server:app --reload --port 8000
 ```
 
-Backend API will be available at http://localhost:8000
-
 ### API Documentation
-Once the backend is running, visit:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+Once the backend is deployed, visit:
+- Swagger UI: https://your-backend-url.com/docs
+- ReDoc: https://your-backend-url.com/redoc
 
 ## Deployment
 
