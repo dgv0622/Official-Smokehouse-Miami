@@ -78,9 +78,9 @@ async def root():
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
+    status_dict = input.model_dump()
     status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
+    _ = await db.status_checks.insert_one(status_obj.model_dump())
     return status_obj
 
 @api_router.get("/status", response_model=List[StatusCheck])
@@ -92,9 +92,9 @@ async def get_status_checks():
 @api_router.post("/chat/session", response_model=ChatSession)
 async def create_chat_session(session_data: ChatSessionCreate):
     """Create a new chat session with user information"""
-    session = ChatSession(**session_data.dict())
-    await db.chat_sessions.insert_one(session.dict())
-    logger.info(f"Created chat session: {session.id} for {session.user_email}")
+    session = ChatSession(**session_data.model_dump())
+    await db.chat_sessions.insert_one(session.model_dump())
+    logger.info(f"Created chat session: {session.id}")
     return session
 
 @api_router.post("/chat/message", response_model=ChatMessage)
@@ -111,7 +111,7 @@ async def send_chat_message(message_data: ChatMessageSend):
         message=message_data.message,
         sender="user"
     )
-    await db.chat_messages.insert_one(user_message.dict())
+    await db.chat_messages.insert_one(user_message.model_dump())
     
     # Get n8n webhook URL
     config = await db.n8n_config.find_one({})
@@ -157,8 +157,8 @@ async def send_chat_message(message_data: ChatMessageSend):
         message=bot_response_text,
         sender="bot"
     )
-    await db.chat_messages.insert_one(bot_message.dict())
-    
+    await db.chat_messages.insert_one(bot_message.model_dump())
+
     return bot_message
 
 @api_router.get("/chat/messages/{session_id}", response_model=List[ChatMessage])
