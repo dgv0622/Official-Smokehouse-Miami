@@ -10,15 +10,83 @@ from typing import List, Optional
 import uuid
 from datetime import datetime
 import httpx
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# n8n configuration (read from environment)
+# If no DB-stored webhook is found, the server will fall back to this env var.
+N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL")
+N8N_API_KEY = os.environ.get("N8N_API_KEY")
+# Optional: customize how the API key is sent
+# - Header name to use (default: X-N8N-API-KEY)
+N8N_API_KEY_HEADER_NAME = os.environ.get("N8N_API_KEY_HEADER_NAME", "X-N8N-API-KEY")
+# - If set, send API key as a query parameter with this name (takes precedence over header)
+N8N_API_KEY_QUERY_PARAM = os.environ.get("N8N_API_KEY_QUERY_PARAM")
+
+# Database configuration with in-memory fallback (for local/tests)
+MONGO_URL = os.environ.get('MONGO_URL')
+DB_NAME = os.environ.get('DB_NAME', 'smokehouse')
+USE_IN_MEMORY_DB = os.environ.get('USE_IN_MEMORY_DB', '').lower() == 'true' or not MONGO_URL
+
+client = None
+
+if not USE_IN_MEMORY_DB:
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client[DB_NAME]
+else:
+    from typing import Any, Dict, Optional as OptDict
+
+    class InMemoryCursor:
+        def __init__(self, items):
+            self._items = list(items)
+
+        def sort(self, field: str, direction: int):
+            reverse = direction == -1
+            self._items.sort(key=lambda x: x.get(field), reverse=reverse)
+            return self
+
+        async def to_list(self, length: int):
+            return self._items[:length]
+
+    class InMemoryCollection:
+        def __init__(self):
+            self._items: list[Dict[str, Any]] = []
+
+        async def insert_one(self, doc: Dict[str, Any]):
+            self._items.append(dict(doc))
+            return None
+
+        async def find_one(self, filter: Dict[str, Any]):
+            for item in reversed(self._items):
+                if all(item.get(k) == v for k, v in filter.items()):
+                    return dict(item)
+            return None
+
+        def find(self, filter: OptDict[Dict[str, Any]] = None):
+            if not filter:
+                matched = list(self._items)
+            else:
+                matched = [i for i in self._items if all(i.get(k) == v for k, v in filter.items())]
+            return InMemoryCursor(matched)
+
+        async def delete_many(self, filter: Dict[str, Any]):
+            if not filter:
+                self._items.clear()
+                return None
+            self._items = [i for i in self._items if not all(i.get(k) == v for k, v in filter.items())]
+            return None
+
+    class InMemoryDB:
+        def __init__(self):
+            self.status_checks = InMemoryCollection()
+            self.chat_sessions = InMemoryCollection()
+            self.chat_messages = InMemoryCollection()
+            self.n8n_config = InMemoryCollection()
+
+    db = InMemoryDB()
 
 # Configure logging
 logging.basicConfig(
@@ -113,11 +181,17 @@ async def send_chat_message(message_data: ChatMessageSend):
     )
     await db.chat_messages.insert_one(user_message.model_dump())
     
+<<<<<<< HEAD
     # Get n8n webhook URL (from env var or database)
     webhook_url = os.environ.get('N8N_WEBHOOK_URL')
     if not webhook_url:
         config = await db.n8n_config.find_one({})
         webhook_url = config.get("webhook_url") if config else None
+=======
+    # Get n8n webhook URL
+    config = await db.n8n_config.find_one({})
+    webhook_url = (config.get("webhook_url") if (config and config.get("webhook_url")) else N8N_WEBHOOK_URL)
+>>>>>>> 979288980663d05c5809036417f5ab6169749869
     
     bot_response_text = ""
     
@@ -125,23 +199,45 @@ async def send_chat_message(message_data: ChatMessageSend):
         try:
             # Send to n8n workflow
             async with httpx.AsyncClient(timeout=30.0) as client:
+                # Build URL and headers depending on how the API key should be passed
+                request_headers = {}
+                url_to_post = webhook_url
+
+                if N8N_API_KEY and N8N_API_KEY_QUERY_PARAM:
+                    # Append API key as query param
+                    parts = urlsplit(url_to_post)
+                    query_params = dict(parse_qsl(parts.query))
+                    query_params[N8N_API_KEY_QUERY_PARAM] = N8N_API_KEY
+                    new_query = urlencode(query_params, doseq=True)
+                    url_to_post = urlunsplit((parts.scheme, parts.netloc, parts.path, new_query, parts.fragment))
+                elif N8N_API_KEY:
+                    # Send API key in header (default)
+                    request_headers[N8N_API_KEY_HEADER_NAME] = N8N_API_KEY
+
                 response = await client.post(
-                    webhook_url,
+                    url_to_post,
                     json={
                         "session_id": message_data.session_id,
                         "user_name": session.get("user_name"),
                         "user_email": session.get("user_email"),
                         "message": message_data.message,
                         "timestamp": datetime.utcnow().isoformat()
-                    }
+                    },
+                    headers=request_headers or None
                 )
                 response.raise_for_status()
-                
-                # Parse n8n response
-                n8n_response = response.json()
-                # Assuming n8n returns {"response": "bot message"} or similar
-                # Adjust this based on your n8n workflow output
-                bot_response_text = n8n_response.get("response") or n8n_response.get("message") or str(n8n_response)
+
+                # Parse n8n response (support JSON or plain text)
+                try:
+                    n8n_response = response.json()
+                    bot_response_text = (
+                        n8n_response.get("response")
+                        or n8n_response.get("message")
+                        or str(n8n_response)
+                    )
+                except ValueError:
+                    # Not JSON; use raw text
+                    bot_response_text = response.text.strip() or "(no response)"
                 
         except httpx.HTTPError as e:
             logger.error(f"Error calling n8n webhook: {e}")
@@ -179,9 +275,9 @@ async def get_n8n_config():
 
     # Fall back to database
     config = await db.n8n_config.find_one({})
-    if config:
+    if config and config.get("webhook_url"):
         return N8nConfig(webhook_url=config.get("webhook_url"))
-    return N8nConfig(webhook_url=None)
+    return N8nConfig(webhook_url=N8N_WEBHOOK_URL)
 
 @api_router.put("/chat/config")
 async def update_n8n_config(config_data: N8nConfigUpdate):
@@ -205,4 +301,5 @@ app.add_middleware(
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if client is not None:
+        client.close()
