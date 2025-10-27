@@ -20,6 +20,13 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Create the main app without a prefix
 app = FastAPI()
 
@@ -176,13 +183,6 @@ async def update_n8n_config(config_data: N8nConfigUpdate):
     await db.n8n_config.insert_one({"webhook_url": config_data.webhook_url})
     logger.info("Updated n8n webhook URL")
     return {"message": "Configuration updated successfully", "webhook_url": config_data.webhook_url}
-
-# Configure logging (before routes that use logger)
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 # Include the router in the main app
 app.include_router(api_router)
