@@ -180,19 +180,11 @@ async def send_chat_message(message_data: ChatMessageSend):
         sender="user"
     )
     await db.chat_messages.insert_one(user_message.model_dump())
-    
-<<<<<<< HEAD
-    # Get n8n webhook URL (from env var or database)
-    webhook_url = os.environ.get('N8N_WEBHOOK_URL')
-    if not webhook_url:
-        config = await db.n8n_config.find_one({})
-        webhook_url = config.get("webhook_url") if config else None
-=======
-    # Get n8n webhook URL
+
+    # Get n8n webhook URL (check database first, then fall back to env var)
     config = await db.n8n_config.find_one({})
     webhook_url = (config.get("webhook_url") if (config and config.get("webhook_url")) else N8N_WEBHOOK_URL)
->>>>>>> 979288980663d05c5809036417f5ab6169749869
-    
+
     bot_response_text = ""
     
     if webhook_url:
