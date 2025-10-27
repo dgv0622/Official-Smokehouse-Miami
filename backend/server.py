@@ -113,9 +113,11 @@ async def send_chat_message(message_data: ChatMessageSend):
     )
     await db.chat_messages.insert_one(user_message.model_dump())
     
-    # Get n8n webhook URL
-    config = await db.n8n_config.find_one({})
-    webhook_url = config.get("webhook_url") if config else None
+    # Get n8n webhook URL (from env var or database)
+    webhook_url = os.environ.get('N8N_WEBHOOK_URL')
+    if not webhook_url:
+        config = await db.n8n_config.find_one({})
+        webhook_url = config.get("webhook_url") if config else None
     
     bot_response_text = ""
     
@@ -170,6 +172,12 @@ async def get_chat_messages(session_id: str):
 @api_router.get("/chat/config", response_model=N8nConfig)
 async def get_n8n_config():
     """Get the current n8n webhook configuration"""
+    # Check environment variable first
+    webhook_url = os.environ.get('N8N_WEBHOOK_URL')
+    if webhook_url:
+        return N8nConfig(webhook_url=webhook_url)
+
+    # Fall back to database
     config = await db.n8n_config.find_one({})
     if config:
         return N8nConfig(webhook_url=config.get("webhook_url"))
