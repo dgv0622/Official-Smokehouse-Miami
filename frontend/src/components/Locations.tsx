@@ -69,7 +69,7 @@ const Locations = () => {
           </div>
 
           {/* Footer Note */}
-          <div className="mt-12 pt-8 border-t border-burnt-umber/10">
+          <div className="mt-16 pt-8 border-t border-burnt-umber/10">
             <p className="text-sm text-charcoal-gray/60 italic">
               Bringing authentic BBQ to your neighborhood
             </p>
