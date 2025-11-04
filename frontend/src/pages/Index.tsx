@@ -53,7 +53,13 @@ const Index = () => {
       {/* Smoke Line Divider */}
       <SmokeDivider />
 
-      {/* 2. Testimonials - Stories from the Table - SECOND */}
+      {/* 2. Service Locations - SECOND */}
+      <Locations />
+
+      {/* Smoke Line Divider */}
+      <SmokeDivider />
+
+      {/* 3. Testimonials - Stories from the Table - THIRD */}
       <Testimonials />
 
       {/* Smoke Line Divider */}
