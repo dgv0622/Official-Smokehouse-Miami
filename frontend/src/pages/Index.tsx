@@ -8,6 +8,7 @@ import MenuCarousel from '@/components/MenuCarousel';
 import OurValues from '@/components/OurValues';
 import Testimonials from '@/components/Testimonials';
 import QuoteCalculator from '@/components/QuoteCalculator';
+import Locations from '@/components/Locations';
 import Footer from '@/components/Footer';
 import ChatBot from '@/components/ChatBot';
 
