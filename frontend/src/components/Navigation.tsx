@@ -57,7 +57,7 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <ul className="hidden md:flex gap-8">
-            {['calculator', 'gallery', 'packages', 'about'].map((item) => (
+            {['calculator', 'locations', 'gallery', 'packages', 'about'].map((item) => (
               <li key={item}>
                 <button
                   onClick={() => handleNavigation(item)}
