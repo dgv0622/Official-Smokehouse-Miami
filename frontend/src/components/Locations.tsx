@@ -43,17 +43,27 @@ const Locations = () => {
             <div className="w-16 h-0.5 bg-burnt-umber/30 mx-auto" />
           </div>
 
-          {/* Locations List */}
-          <div className="space-y-4">
-            {locations.map((location, index) => (
+          {/* Locations List - 3 per row */}
+          <div className="space-y-6">
+            {Array.from({ length: Math.ceil(locations.length / 3) }).map((_, rowIndex) => (
               <div 
-                key={location}
-                className="animate-in fade-in-up duration-700 py-3 border-b border-burnt-umber/10 last:border-b-0"
-                style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
+                key={rowIndex}
+                className="flex items-center justify-center gap-6 animate-in fade-in-up duration-700"
+                style={{ animationDelay: `${rowIndex * 150}ms`, animationFillMode: 'backwards' }}
               >
-                <p className="text-2xl md:text-3xl font-serif text-burnt-umber tracking-wide">
-                  {location}
-                </p>
+                {locations.slice(rowIndex * 3, rowIndex * 3 + 3).map((location, colIndex) => (
+                  <>
+                    <p 
+                      key={location}
+                      className="text-2xl md:text-3xl font-serif text-burnt-umber tracking-wide italic"
+                    >
+                      {location}
+                    </p>
+                    {colIndex < 2 && rowIndex * 3 + colIndex < locations.length - 1 && (
+                      <span className="text-burnt-umber/40 text-xl">•</span>
+                    )}
+                  </>
+                ))}
               </div>
             ))}
           </div>
