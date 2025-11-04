@@ -74,3 +74,7 @@ chainlit.md
 *.pack
 *.deb
 *.dylib
+-e 
+# Environment files
+*.env
+*.env.*
