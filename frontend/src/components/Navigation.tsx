@@ -82,7 +82,7 @@ const Navigation = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden pb-6 animate-fade-in">
             <ul className="flex flex-col gap-4">
-              {['calculator', 'gallery', 'packages', 'about'].map((item) => (
+              {['calculator', 'locations', 'gallery', 'packages', 'about'].map((item) => (
                 <li key={item}>
                   <button
                     onClick={() => handleNavigation(item)}
