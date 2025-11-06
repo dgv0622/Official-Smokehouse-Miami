@@ -47,10 +47,10 @@ const Hero = () => {
       />
 
       {/* Content */}
-      <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
+      <div className="relative z-10 text-center px-4 md:px-6 max-w-5xl mx-auto">
         {/* Main Headline */}
         <h1 
-          className="text-5xl md:text-7xl lg:text-8xl font-serif text-cream-white mb-6 tracking-wide leading-tight animate-in fade-in-up duration-1000"
+          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-serif text-cream-white mb-4 md:mb-6 tracking-wide leading-tight animate-in fade-in-up duration-1000"
           style={{ animationDelay: '300ms', animationFillMode: 'backwards' }}
         >
           Real Food. Real Values.
@@ -60,7 +60,7 @@ const Hero = () => {
 
         {/* Subtext */}
         <p 
-          className="text-lg md:text-xl text-cream-white/80 mb-10 tracking-wide font-light max-w-2xl mx-auto leading-relaxed animate-in fade-in-up duration-1000"
+          className="text-base md:text-lg lg:text-xl text-cream-white/80 mb-8 md:mb-10 tracking-wide font-light max-w-2xl mx-auto leading-relaxed animate-in fade-in-up duration-1000"
           style={{ animationDelay: '600ms', animationFillMode: 'backwards' }}
         >
           Heritage and craftsmanship meet modern hospitality. 
@@ -76,7 +76,7 @@ const Hero = () => {
           <Button
             onClick={scrollToCalculator}
             size="lg"
-            className="h-14 px-10 bg-burnt-umber hover:bg-burnt-umber/90 text-cream-white text-base tracking-wide font-medium rounded shadow-lg hover:shadow-xl transition-all duration-300 border border-faded-mustard/30"
+            className="h-12 md:h-14 px-8 md:px-10 bg-burnt-umber hover:bg-burnt-umber/90 text-cream-white text-sm md:text-base tracking-wide font-medium rounded shadow-lg hover:shadow-xl transition-all duration-300 border border-faded-mustard/30"
           >
             Plan Your Feast
           </Button>
