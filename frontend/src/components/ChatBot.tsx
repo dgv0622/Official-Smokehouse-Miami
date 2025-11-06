@@ -160,7 +160,7 @@ const ChatBot = () => {
       {!isOpen && (
         <button
           onClick={toggleChat}
-          className="fixed bottom-20 right-8 z-50 group"
+          className="fixed bottom-6 right-4 md:bottom-20 md:right-8 z-50 group"
           aria-label="Open chat"
         >
           <div className="relative">
@@ -168,16 +168,16 @@ const ChatBot = () => {
             <div className="absolute inset-0 bg-amber-600 rounded-full animate-ping opacity-75"></div>
             
             {/* Main button */}
-            <div className="relative bg-gradient-to-br from-amber-700 via-amber-600 to-yellow-700 text-faded-mustard rounded-full p-5 shadow-2xl hover:shadow-amber-600/60 transition-all duration-300 hover:scale-110 border-2 border-faded-mustard/30">
-              <MessageCircle className="w-8 h-8" strokeWidth={2.5} />
+            <div className="relative bg-gradient-to-br from-amber-700 via-amber-600 to-yellow-700 text-faded-mustard rounded-full p-4 md:p-5 shadow-2xl hover:shadow-amber-600/60 transition-all duration-300 hover:scale-110 border-2 border-faded-mustard/30">
+              <MessageCircle className="w-7 h-7 md:w-8 md:h-8" strokeWidth={2.5} />
             </div>
             
             {/* Glow effect */}
             <div className="absolute inset-0 rounded-full bg-amber-600/40 blur-2xl group-hover:bg-amber-600/60 transition-all duration-300"></div>
           </div>
           
-          {/* Tooltip */}
-          <div className="absolute bottom-full right-0 mb-3 px-4 py-2 bg-gradient-to-r from-gray-900 to-gray-800 text-white text-sm rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap border border-white/10">
+          {/* Tooltip - Hidden on mobile */}
+          <div className="hidden md:block absolute bottom-full right-0 mb-3 px-4 py-2 bg-gradient-to-r from-gray-900 to-gray-800 text-white text-sm rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap border border-white/10">
             <span className="font-medium">Chat with us!</span>
             <div className="absolute top-full right-6 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
           </div>
@@ -186,7 +186,7 @@ const ChatBot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-8 z-50 w-[420px] h-[650px] bg-cream-white rounded shadow-card flex flex-col overflow-hidden border border-amber-600/30">
+        <div className="fixed inset-0 md:inset-auto md:bottom-20 md:right-8 z-50 w-full h-full md:w-[420px] md:h-[650px] bg-cream-white md:rounded shadow-card flex flex-col overflow-hidden border-0 md:border md:border-amber-600/30">
           {/* Header */}
           <div className="bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-700 text-cream-white p-6 flex items-center justify-between relative overflow-hidden">
             {/* Subtle texture */}
