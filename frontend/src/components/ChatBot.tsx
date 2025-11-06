@@ -216,19 +216,19 @@ const ChatBot = () => {
 
           {/* User Info Form */}
           {showUserForm && (
-            <div className="flex-1 p-8 flex flex-col justify-center bg-gradient-to-br from-cream-white to-amber-50">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-700 to-amber-600 rounded mb-4 shadow-soft">
-                  <MessageCircle className="w-8 h-8 text-faded-mustard" strokeWidth={2.5} />
+            <div className="flex-1 p-6 md:p-8 flex flex-col justify-center bg-gradient-to-br from-cream-white to-amber-50">
+              <div className="text-center mb-6 md:mb-8">
+                <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-amber-700 to-amber-600 rounded mb-4 shadow-soft">
+                  <MessageCircle className="w-7 h-7 md:w-8 md:h-8 text-faded-mustard" strokeWidth={2.5} />
                 </div>
-                <h4 className="text-2xl font-serif mb-2 text-charcoal-gray">
+                <h4 className="text-xl md:text-2xl font-serif mb-2 text-charcoal-gray">
                   Welcome!
                 </h4>
                 <p className="text-sm text-charcoal-gray/70 font-light">
                   Let's get started with your BBQ catering journey
                 </p>
               </div>
-              <form onSubmit={handleCreateSession} className="space-y-5">
+              <form onSubmit={handleCreateSession} className="space-y-4 md:space-y-5">
                 <div>
                   <Label htmlFor="name" className="text-sm font-medium text-charcoal-gray">Your Name</Label>
                   <Input
