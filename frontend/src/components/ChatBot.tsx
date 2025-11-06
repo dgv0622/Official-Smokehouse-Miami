@@ -289,13 +289,6 @@ const ChatBot = () => {
                         }`}
                       >
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
-                        <p className={`text-xs mt-1.5 md:mt-2 ${msg.sender === 'user' ? 'text-cream-white/70' : 'text-charcoal-gray/60'}`}>
-                          {new Date(msg.timestamp).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            timeZone: 'America/New_York'
-                          })}
-                        </p>
                       </div>
                     </div>
                   ))}
