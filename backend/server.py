@@ -9,8 +9,13 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
 import uuid
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import httpx
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+
+# Helper function to get current time in NY timezone
+def get_ny_time():
+    return datetime.now(ZoneInfo("America/New_York"))
 
 
 ROOT_DIR = Path(__file__).parent
@@ -106,7 +111,7 @@ api_router = APIRouter(prefix="/api")
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_name: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=get_ny_time)
 
 class StatusCheckCreate(BaseModel):
     client_name: str
@@ -116,7 +121,7 @@ class ChatSession(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_name: str
     user_email: EmailStr
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=get_ny_time)
 
 class ChatSessionCreate(BaseModel):
     user_name: str
@@ -127,7 +132,7 @@ class ChatMessage(BaseModel):
     session_id: str
     message: str
     sender: str  # "user" or "bot"
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=get_ny_time)
 
 class ChatMessageSend(BaseModel):
     session_id: str
@@ -213,7 +218,7 @@ async def send_chat_message(message_data: ChatMessageSend):
                         "user_name": session.get("user_name"),
                         "user_email": session.get("user_email"),
                         "message": message_data.message,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": get_ny_time().isoformat()
                     },
                     headers=request_headers or None
                 )
