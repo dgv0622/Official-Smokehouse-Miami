@@ -11,7 +11,7 @@ from datetime import datetime
 import sys
 
 # Use the production URL from frontend/.env
-BASE_URL = "https://delivery-zones.preview.emergentagent.com/api"
+BASE_URL = "https://chat-viewport-fix-1.preview.emergentagent.com/api"
 
 class ChatbotAPITester:
     def __init__(self):
