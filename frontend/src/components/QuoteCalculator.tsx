@@ -139,15 +139,15 @@ const QuoteCalculator = () => {
 
         {/* Step 2: Guest Count */}
         {currentStep === 2 && (
-          <div className="space-y-6 animate-fade-in-up">
+          <div className="space-y-4 md:space-y-6 animate-fade-in-up">
             <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 2 of 5</div>
-            <h2 className="text-2xl font-light text-foreground mb-6">How many guests are you expecting?</h2>
+            <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">How many guests are you expecting?</h2>
             <Input
               type="number"
               placeholder="Enter number of guests"
               value={formData.guestCount}
               onChange={(e) => setFormData({ ...formData, guestCount: e.target.value })}
-              className="text-lg p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
+              className="text-base md:text-lg p-4 md:p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
               min="1"
             />
           </div>
