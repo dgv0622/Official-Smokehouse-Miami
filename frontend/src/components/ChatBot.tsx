@@ -293,6 +293,7 @@ const ChatBot = () => {
                           {new Date(msg.timestamp).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
+                            timeZone: 'America/New_York'
                           })}
                         </p>
                       </div>
