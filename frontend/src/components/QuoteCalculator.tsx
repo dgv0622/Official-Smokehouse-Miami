@@ -107,9 +107,9 @@ const QuoteCalculator = () => {
 
   return (
     <div ref={ref} className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-      <div className="bg-gradient-calculator rounded-lg p-12 shadow-elegant border border-accent/20">
+      <div className="bg-gradient-calculator rounded-lg p-6 md:p-12 shadow-elegant border border-accent/20">
         {/* Progress Bar */}
-        <div className="w-full h-1 bg-black/40 mb-8 rounded-full overflow-hidden">
+        <div className="w-full h-1 bg-black/40 mb-6 md:mb-8 rounded-full overflow-hidden">
           <div 
             className="h-full bg-gradient-gold transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -118,19 +118,19 @@ const QuoteCalculator = () => {
 
         {/* Step 1: Event Type */}
         {currentStep === 1 && (
-          <div className="space-y-6 animate-fade-in-up">
+          <div className="space-y-4 md:space-y-6 animate-fade-in-up">
             <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 1 of 5</div>
-            <h2 className="text-2xl font-light text-foreground mb-6">What type of event are you planning?</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">What type of event are you planning?</h2>
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
               {['corporate', 'wedding', 'private', 'other'].map((type) => (
                 <button
                   key={type}
                   onClick={() => setFormData({ ...formData, eventType: type })}
-                  className={`p-6 border-2 rounded-lg transition-all duration-300 hover:border-faded-mustard hover:-translate-y-1 hover:shadow-card ${
+                  className={`p-4 md:p-6 border-2 rounded-lg transition-all duration-300 hover:border-faded-mustard hover:-translate-y-1 hover:shadow-card ${
                     formData.eventType === type ? 'border-faded-mustard bg-gradient-to-br from-amber-700/30 to-amber-600/30' : 'border-border/20 bg-amber-700/10'
                   }`}
                 >
-                  <span className="capitalize text-foreground">{type === 'corporate' ? 'Corporate Event' : type === 'private' ? 'Private Party' : type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                  <span className="capitalize text-sm md:text-base text-foreground">{type === 'corporate' ? 'Corporate Event' : type === 'private' ? 'Private Party' : type.charAt(0).toUpperCase() + type.slice(1)}</span>
                 </button>
               ))}
             </div>
