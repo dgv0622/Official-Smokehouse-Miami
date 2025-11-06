@@ -155,10 +155,10 @@ const QuoteCalculator = () => {
 
         {/* Step 3: Service Level */}
         {currentStep === 3 && (
-          <div className="space-y-6 animate-fade-in-up">
+          <div className="space-y-4 md:space-y-6 animate-fade-in-up">
             <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 3 of 5</div>
-            <h2 className="text-2xl font-light text-foreground mb-6">What level of service do you prefer?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">What level of service do you prefer?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               {[
                 { value: 'basic', title: 'Essential', desc: 'Disposable ware, 2hr service' },
                 { value: 'standard', title: 'Executive', desc: 'Premium ware, staff, 4hr' },
@@ -167,12 +167,12 @@ const QuoteCalculator = () => {
                 <button
                   key={level.value}
                   onClick={() => setFormData({ ...formData, serviceLevel: level.value })}
-                  className={`p-6 border-2 rounded-lg transition-all duration-300 hover:border-faded-mustard hover:-translate-y-1 hover:shadow-card ${
+                  className={`p-4 md:p-6 border-2 rounded-lg transition-all duration-300 hover:border-faded-mustard hover:-translate-y-1 hover:shadow-card ${
                     formData.serviceLevel === level.value ? 'border-faded-mustard bg-gradient-to-br from-amber-700/30 to-amber-600/30' : 'border-border/20 bg-amber-700/10'
                   }`}
                 >
-                  <div className="font-medium text-foreground mb-2">{level.title}</div>
-                  <div className="text-sm text-foreground/60">{level.desc}</div>
+                  <div className="font-medium text-sm md:text-base text-foreground mb-1 md:mb-2">{level.title}</div>
+                  <div className="text-xs md:text-sm text-foreground/60">{level.desc}</div>
                 </button>
               ))}
             </div>
@@ -181,14 +181,14 @@ const QuoteCalculator = () => {
 
         {/* Step 4: Menu Notes */}
         {currentStep === 4 && (
-          <div className="space-y-6 animate-fade-in-up">
+          <div className="space-y-4 md:space-y-6 animate-fade-in-up">
             <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 4 of 5</div>
-            <h2 className="text-2xl font-light text-foreground mb-6">Any special menu requirements?</h2>
+            <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">Any special menu requirements?</h2>
             <Textarea
               placeholder="Dietary restrictions, preferred meats, special requests..."
               value={formData.menuNotes}
               onChange={(e) => setFormData({ ...formData, menuNotes: e.target.value })}
-              className="min-h-32 text-lg p-4 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
+              className="min-h-32 text-base md:text-lg p-3 md:p-4 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
               rows={4}
             />
           </div>
@@ -196,47 +196,47 @@ const QuoteCalculator = () => {
 
         {/* Step 5: Contact Info */}
         {currentStep === 5 && (
-          <div className="space-y-6 animate-fade-in-up">
+          <div className="space-y-4 md:space-y-6 animate-fade-in-up">
             <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 5 of 5</div>
-            <h2 className="text-2xl font-light text-foreground mb-6">How can we reach you?</h2>
-            <div className="space-y-4">
+            <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">How can we reach you?</h2>
+            <div className="space-y-3 md:space-y-4">
               <Input
                 type="text"
                 placeholder="Your name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="text-lg p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
+                className="text-base md:text-lg p-4 md:p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
               />
               <Input
                 type="email"
                 placeholder="Your email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="text-lg p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
+                className="text-base md:text-lg p-4 md:p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
               />
               <Input
                 type="tel"
                 placeholder="Your phone number"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="text-lg p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
+                className="text-base md:text-lg p-4 md:p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
               />
             </div>
           </div>
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex gap-4 mt-8">
+        <div className="flex gap-3 md:gap-4 mt-6 md:mt-8">
           <Button
             onClick={handleBack}
             variant="secondary"
-            className={`flex-1 px-6 py-6 tracking-widest uppercase text-sm bg-black/40 hover:bg-black/60 text-foreground border border-accent/20 ${currentStep === 1 ? 'invisible' : ''}`}
+            className={`flex-1 px-4 md:px-6 py-4 md:py-6 tracking-widest uppercase text-xs md:text-sm bg-black/40 hover:bg-black/60 text-foreground border border-accent/20 ${currentStep === 1 ? 'invisible' : ''}`}
           >
             Back
           </Button>
           <Button
             onClick={handleNext}
-            className="flex-1 bg-gradient-gold hover:shadow-glow transition-all duration-300 hover:-translate-y-1 text-black px-6 py-6 tracking-widest uppercase text-sm font-semibold"
+            className="flex-1 bg-gradient-gold hover:shadow-glow transition-all duration-300 hover:-translate-y-1 text-black px-4 md:px-6 py-4 md:py-6 tracking-widest uppercase text-xs md:text-sm font-semibold"
           >
             {currentStep === totalSteps ? 'Get My Estimate' : 'Next'}
           </Button>
