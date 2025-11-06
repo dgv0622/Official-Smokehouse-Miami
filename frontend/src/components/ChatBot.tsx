@@ -274,22 +274,22 @@ const ChatBot = () => {
           {/* Chat Messages */}
           {!showUserForm && session && (
             <>
-              <ScrollArea className="flex-1 p-6 bg-gradient-to-br from-cream-white to-amber-50">
-                <div className="space-y-4">
+              <ScrollArea className="flex-1 p-4 md:p-6 bg-gradient-to-br from-cream-white to-amber-50">
+                <div className="space-y-3 md:space-y-4">
                   {messages.map((msg, index) => (
                     <div
                       key={msg.id || index}
                       className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
                     >
                       <div
-                        className={`max-w-[85%] rounded px-4 py-3 shadow-soft ${
+                        className={`max-w-[85%] rounded px-3 py-2 md:px-4 md:py-3 shadow-soft ${
                           msg.sender === 'user'
                             ? 'bg-gradient-to-r from-amber-700 to-amber-600 text-faded-mustard border border-faded-mustard/30'
                             : 'bg-white text-charcoal-gray border border-amber-600/20'
                         }`}
                       >
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
-                        <p className={`text-xs mt-2 ${msg.sender === 'user' ? 'text-cream-white/70' : 'text-charcoal-gray/60'}`}>
+                        <p className={`text-xs mt-1.5 md:mt-2 ${msg.sender === 'user' ? 'text-cream-white/70' : 'text-charcoal-gray/60'}`}>
                           {new Date(msg.timestamp).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
@@ -300,7 +300,7 @@ const ChatBot = () => {
                   ))}
                   {isLoading && (
                     <div className="flex justify-start animate-in slide-in-from-bottom-2 duration-300">
-                      <div className="bg-white rounded px-4 py-3 shadow-soft border border-amber-600/20">
+                      <div className="bg-white rounded px-3 py-2 md:px-4 md:py-3 shadow-soft border border-amber-600/20">
                         <div className="flex items-center gap-2">
                           <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
                           <span className="text-sm text-charcoal-gray">Typing...</span>
@@ -313,7 +313,7 @@ const ChatBot = () => {
               </ScrollArea>
 
               {/* Input Area */}
-              <div className="p-5 border-t border-amber-600/20 bg-cream-white">
+              <div className="p-4 md:p-5 border-t border-amber-600/20 bg-cream-white">
                 <form onSubmit={handleSendMessage} className="flex gap-3">
                   <Input
                     type="text"
