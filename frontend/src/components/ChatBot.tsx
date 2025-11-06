@@ -314,30 +314,30 @@ const ChatBot = () => {
 
               {/* Input Area */}
               <div className="p-4 md:p-5 border-t border-amber-600/20 bg-cream-white">
-                <form onSubmit={handleSendMessage} className="flex gap-3">
+                <form onSubmit={handleSendMessage} className="flex gap-2 md:gap-3">
                   <Input
                     type="text"
                     placeholder="Type your message..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     disabled={isLoading}
-                    className="flex-1 h-11 rounded border border-amber-600/20 focus:border-amber-600 focus:ring-2 focus:ring-faded-mustard/20 transition-all duration-200 bg-white text-charcoal-gray placeholder:text-charcoal-gray/40"
+                    className="flex-1 h-10 md:h-11 rounded border border-amber-600/20 focus:border-amber-600 focus:ring-2 focus:ring-faded-mustard/20 transition-all duration-200 bg-white text-charcoal-gray placeholder:text-charcoal-gray/40 text-sm md:text-base"
                   />
                   <Button
                     type="submit"
                     size="icon"
                     disabled={isLoading || !inputMessage.trim()}
-                    className="h-11 w-11 bg-gradient-to-r from-amber-700 to-amber-600 hover:shadow-lg hover:shadow-amber-600/50 transition-all duration-250 rounded text-faded-mustard border border-faded-mustard/30"
+                    className="h-10 w-10 md:h-11 md:w-11 bg-gradient-to-r from-amber-700 to-amber-600 hover:shadow-lg hover:shadow-amber-600/50 transition-all duration-250 rounded text-faded-mustard border border-faded-mustard/30 flex-shrink-0"
                   >
-                    <Send className="w-5 h-5" strokeWidth={2.5} />
+                    <Send className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />
                   </Button>
                 </form>
-                <div className="mt-3 flex justify-center">
+                <div className="mt-2 md:mt-3 flex justify-center">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleNewChat}
-                    className="text-xs text-charcoal-gray/60 hover:text-amber-600 transition-colors duration-200 rounded font-normal"
+                    className="text-xs text-charcoal-gray/60 hover:text-amber-600 transition-colors duration-200 rounded font-normal h-8"
                   >
                     Start New Chat
                   </Button>
