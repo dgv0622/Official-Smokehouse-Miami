@@ -63,15 +63,15 @@ const QuoteCalculator = () => {
     const estimatedPrice = calculatePrice();
     return (
       <div ref={ref} className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <div className="bg-gradient-calculator rounded-lg p-12 shadow-elegant border border-accent/20">
-          <div className="text-center py-8">
-            <h2 className="text-3xl font-light mb-4 text-foreground">Your Estimated Price</h2>
-            <div className="text-6xl font-extralight text-accent my-8">
+        <div className="bg-gradient-calculator rounded-lg p-6 md:p-12 shadow-elegant border border-accent/20">
+          <div className="text-center py-4 md:py-8">
+            <h2 className="text-2xl md:text-3xl font-light mb-3 md:mb-4 text-foreground">Your Estimated Price</h2>
+            <div className="text-4xl md:text-6xl font-extralight text-accent my-6 md:my-8">
               ${estimatedPrice.toLocaleString()}
             </div>
-            <p className="text-foreground/70 mb-8">Based on {formData.guestCount} guests with {formData.serviceLevel} service</p>
+            <p className="text-sm md:text-base text-foreground/70 mb-6 md:mb-8">Based on {formData.guestCount} guests with {formData.serviceLevel} service</p>
             
-            <div className="bg-black/40 border-l-4 border-accent p-6 rounded-lg text-left mb-8">
+            <div className="bg-black/40 border-l-4 border-accent p-4 md:p-6 rounded-lg text-left mb-6 md:mb-8">
               <h3 className="text-xl font-light mb-4 text-foreground">Recommended Package</h3>
               <ul className="space-y-2 text-foreground/80">
                 <li className="flex items-center gap-2">
