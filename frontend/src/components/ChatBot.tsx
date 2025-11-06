@@ -188,19 +188,19 @@ const ChatBot = () => {
       {isOpen && (
         <div className="fixed inset-0 md:inset-auto md:bottom-20 md:right-8 z-50 w-full h-full md:w-[420px] md:h-[650px] bg-cream-white md:rounded shadow-card flex flex-col overflow-hidden border-0 md:border md:border-amber-600/30">
           {/* Header */}
-          <div className="bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-700 text-cream-white p-6 flex items-center justify-between relative overflow-hidden">
+          <div className="bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-700 text-cream-white p-4 md:p-6 flex items-center justify-between relative overflow-hidden">
             {/* Subtle texture */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 left-0 w-32 h-32 bg-faded-mustard rounded-full -translate-x-1/2 -translate-y-1/2"></div>
               <div className="absolute bottom-0 right-0 w-24 h-24 bg-faded-mustard rounded-full translate-x-1/2 translate-y-1/2"></div>
             </div>
             
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="bg-faded-mustard/40 backdrop-blur-sm p-2.5 rounded">
-                <MessageCircle className="w-6 h-6 text-faded-mustard" strokeWidth={2.5} />
+            <div className="flex items-center gap-3 md:gap-4 relative z-10">
+              <div className="bg-faded-mustard/40 backdrop-blur-sm p-2 md:p-2.5 rounded">
+                <MessageCircle className="w-5 h-5 md:w-6 md:h-6 text-faded-mustard" strokeWidth={2.5} />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-lg tracking-wide text-faded-mustard">BBQ Catering Chat</h3>
+                <h3 className="font-serif font-bold text-base md:text-lg tracking-wide text-faded-mustard">BBQ Catering Chat</h3>
                 <p className="text-xs text-cream-white/90 font-light">Real help, real quick 🍖</p>
               </div>
             </div>
