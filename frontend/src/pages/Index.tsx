@@ -20,7 +20,7 @@ const Index = () => {
       <Navigation />
 
       {/* 1. Quote Calculator Section - FIRST */}
-      <section className="min-h-screen flex items-center justify-center py-16 md:py-32 px-4 md:px-6 bg-gradient-to-br from-burnt-umber/10 via-cream-white to-faded-mustard/5 relative" id="calculator">
+      <section className="min-h-screen flex items-center justify-center pt-28 md:pt-36 pb-16 md:pb-32 px-4 md:px-6 bg-gradient-to-br from-burnt-umber/10 via-cream-white to-faded-mustard/5 relative" id="calculator">
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-burnt-umber/30 rounded-full blur-[120px]" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-faded-mustard/20 rounded-full blur-[120px]" />

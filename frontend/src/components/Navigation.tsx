@@ -44,21 +44,27 @@ const Navigation = () => {
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-primary/95 backdrop-blur-lg border-b border-accent/10' : 'bg-primary/95 backdrop-blur-md border-b border-accent/10'
+      isScrolled ? 'bg-primary/98 backdrop-blur-lg border-b border-accent/20 shadow-lg' : 'bg-primary/95 backdrop-blur-md border-b border-accent/10'
     }`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="flex justify-between items-center h-20">
+        <div className={`flex justify-between items-center transition-all duration-300 ${
+          isScrolled ? 'h-16' : 'h-20'
+        }`}>
           {/* Logo */}
           <button
             onClick={() => handleNavigation('home')}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-300"
+            className="flex items-center gap-3 hover:opacity-80 transition-all duration-300"
           >
             <img
               src="/logo.png"
               alt="Smokehouse Miami Logo"
-              className="h-12 w-auto"
+              className={`w-auto transition-all duration-300 ${
+                isScrolled ? 'h-8' : 'h-12'
+              }`}
             />
-            <div className="text-foreground text-xl font-light tracking-[0.2em] uppercase">
+            <div className={`text-foreground font-light tracking-[0.2em] uppercase transition-all duration-300 ${
+              isScrolled ? 'text-base' : 'text-xl'
+            }`}>
               Smokehouse <span className="text-accent font-normal">Miami</span>
             </div>
           </button>
