@@ -50,8 +50,9 @@ const Footer = () => {
             <h4 className="text-sm uppercase tracking-[0.2em] text-faded-mustard font-medium">Get in Touch</h4>
             <div className="space-y-2 text-sm text-cream-white/70">
               <p>Miami, Florida</p>
-              <p>hello@smokehousemiami.com</p>
-              <p>(305) 555-SMOKE</p>
+              <p>degv@smokehouse-miami.com</p>
+              <p>(305) 282-2105</p>
+              <p>(305) 281-4632</p>
             </div>
           </div>
         </div>
