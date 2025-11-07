@@ -41,39 +41,39 @@ const Testimonials = () => {
   }, []);
 
   return (
-    <section className="py-24 md:py-32 px-6 bg-gradient-to-b from-burnt-umber/5 to-cream-white">
+    <section className="py-16 md:py-32 px-4 md:px-6 bg-gradient-to-b from-burnt-umber/5 to-cream-white">
       <div className="max-w-4xl mx-auto">
         {/* Section Header */}
-        <div 
+        <div
           ref={ref}
-          className={`text-center mb-16 transition-all duration-1000 ${
+          className={`text-center mb-10 md:mb-16 transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-faded-mustard text-sm uppercase tracking-[0.2em] font-medium mb-2">
+          <p className="text-faded-mustard text-xs md:text-sm uppercase tracking-[0.2em] font-medium mb-2">
             Stories from the Table
           </p>
-          <h2 className="text-4xl md:text-5xl font-serif text-charcoal-gray tracking-wide">
+          <h2 className="text-3xl md:text-5xl font-serif text-charcoal-gray tracking-wide">
             What Folks Say
           </h2>
         </div>
 
         {/* Testimonial Display */}
-        <div className="relative min-h-[300px] flex items-center justify-center">
+        <div className="relative min-h-[280px] md:min-h-[300px] flex items-center justify-center">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className={`absolute inset-0 flex flex-col items-center justify-center text-center px-6 transition-opacity duration-700 ${
+              className={`absolute inset-0 flex flex-col items-center justify-center text-center px-4 md:px-6 transition-opacity duration-700 ${
                 index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
               }`}
             >
               {/* Circle with initials */}
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-burnt-umber to-dusty-red flex items-center justify-center text-cream-white text-xl font-serif mb-8 shadow-soft">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-burnt-umber to-dusty-red flex items-center justify-center text-cream-white text-lg md:text-xl font-serif mb-6 md:mb-8 shadow-soft">
                 {testimonial.initials}
               </div>
 
               {/* Quote */}
-              <blockquote className="text-2xl md:text-3xl font-serif text-charcoal-gray italic leading-relaxed mb-6">
+              <blockquote className="text-xl md:text-3xl font-serif text-charcoal-gray italic leading-relaxed mb-4 md:mb-6">
                 "{testimonial.quote}"
               </blockquote>
 
@@ -87,14 +87,14 @@ const Testimonials = () => {
         </div>
 
         {/* Dots */}
-        <div className="flex justify-center gap-2 mt-12">
+        <div className="flex justify-center gap-2 mt-8 md:mt-12">
           {testimonials.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex 
-                  ? 'bg-burnt-umber w-8' 
+                index === currentIndex
+                  ? 'bg-burnt-umber w-8'
                   : 'bg-burnt-umber/30 hover:bg-burnt-umber/50'
               }`}
               aria-label={`View testimonial ${index + 1}`}

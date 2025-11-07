@@ -19,46 +19,46 @@ const OurValues = () => {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden">
+    <section className="py-16 md:py-32 relative overflow-hidden">
       {/* Background image area (right side) */}
       <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-burnt-umber/10 to-transparent" />
-      
+
       {/* Linen texture overlay */}
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.04] mix-blend-multiply"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.65' /%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23noise)'/%3E%3C/svg%3E")`,
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div 
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+        <div
           ref={ref}
-          className={`grid md:grid-cols-2 gap-12 md:gap-16 items-center transition-all duration-1000 ${
+          className={`grid md:grid-cols-2 gap-8 md:gap-16 items-center transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
           }`}
         >
           {/* Left: Values Text */}
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
             <div>
-              <p className="text-faded-mustard text-sm uppercase tracking-[0.2em] font-medium mb-2">
+              <p className="text-faded-mustard text-xs md:text-sm uppercase tracking-[0.2em] font-medium mb-2">
                 What We Stand For
               </p>
-              <h2 className="text-4xl md:text-5xl font-serif text-charcoal-gray tracking-wide leading-tight">
+              <h2 className="text-3xl md:text-5xl font-serif text-charcoal-gray tracking-wide leading-tight">
                 Our Values
               </h2>
             </div>
 
             <div className="w-16 h-0.5 bg-burnt-umber/30" />
 
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               {values.map((value, index) => (
-                <div 
+                <div
                   key={value.title}
                   className="space-y-2 animate-in fade-in-up duration-700"
                   style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'backwards' }}
                 >
-                  <h3 className="text-xl font-serif text-burnt-umber">{value.title}</h3>
+                  <h3 className="text-lg md:text-xl font-serif text-burnt-umber">{value.title}</h3>
                   <p className="text-charcoal-gray/70 leading-relaxed">
                     {value.description}
                   </p>
@@ -66,9 +66,9 @@ const OurValues = () => {
               ))}
             </div>
 
-            <div className="pt-4">
+            <div className="pt-3 md:pt-4">
               <p className="text-sm text-charcoal-gray/60 italic">
-                "Patience, craftsmanship, and community — 
+                "Patience, craftsmanship, and community —
                 <br />
                 these are the pillars of everything we smoke."
               </p>

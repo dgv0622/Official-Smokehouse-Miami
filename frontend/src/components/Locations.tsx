@@ -16,46 +16,46 @@ const Locations = () => {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
-    <section className="py-24 md:py-32 bg-gradient-to-b from-cream-white to-burnt-umber/5 relative overflow-hidden" id="locations">
+    <section className="py-16 md:py-32 bg-gradient-to-b from-cream-white to-burnt-umber/5 relative overflow-hidden" id="locations">
       {/* Subtle texture overlay */}
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.03] mix-blend-multiply"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.65' /%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23noise)'/%3E%3C/svg%3E")`,
         }}
       />
 
-      <div className="max-w-4xl mx-auto px-6 relative z-10">
-        <div 
+      <div className="max-w-4xl mx-auto px-4 md:px-6 relative z-10">
+        <div
           ref={ref}
           className={`text-center transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
           {/* Header */}
-          <div className="mb-12">
-            <p className="text-faded-mustard text-sm uppercase tracking-[0.2em] font-medium mb-3">
+          <div className="mb-8 md:mb-12">
+            <p className="text-faded-mustard text-xs md:text-sm uppercase tracking-[0.2em] font-medium mb-3">
               Proudly Serving
             </p>
-            <h2 className="text-4xl md:text-5xl font-serif text-charcoal-gray tracking-wide leading-tight mb-4">
+            <h2 className="text-3xl md:text-5xl font-serif text-charcoal-gray tracking-wide leading-tight mb-3 md:mb-4">
               Service Locations
             </h2>
             <div className="w-16 h-0.5 bg-burnt-umber/30 mx-auto" />
           </div>
 
           {/* Locations List - 3 per row */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {Array.from({ length: Math.ceil(locations.length / 3) }).map((_, rowIndex) => (
-              <div 
+              <div
                 key={rowIndex}
-                className="flex items-center justify-center gap-6 animate-in fade-in-up duration-700"
+                className="flex items-center justify-center gap-3 md:gap-6 animate-in fade-in-up duration-700"
                 style={{ animationDelay: `${rowIndex * 150}ms`, animationFillMode: 'backwards' }}
               >
                 {locations.slice(rowIndex * 3, rowIndex * 3 + 3).map((location, colIndex) => (
                   <>
-                    <p 
+                    <p
                       key={location}
-                      className="text-2xl md:text-3xl font-serif text-burnt-umber tracking-wide italic"
+                      className="text-xl md:text-3xl font-serif text-burnt-umber tracking-wide italic"
                     >
                       {location}
                     </p>
@@ -69,7 +69,7 @@ const Locations = () => {
           </div>
 
           {/* Footer Note */}
-          <div className="mt-16 pt-8 border-t border-burnt-umber/10">
+          <div className="mt-12 md:mt-16 pt-6 md:pt-8 border-t border-burnt-umber/10">
             <p className="text-sm text-charcoal-gray/60 italic">
               Bringing authentic BBQ to your neighborhood
             </p>

@@ -48,25 +48,25 @@ const MenuCarousel = () => {
   const prev = () => setActiveIndex((prev) => (prev - 1 + menuItems.length) % menuItems.length);
 
   return (
-    <section className="py-24 md:py-32 px-6 bg-gradient-to-b from-cream-white to-burnt-umber/5" id="menu">
+    <section className="py-16 md:py-32 px-4 md:px-6 bg-gradient-to-b from-cream-white to-burnt-umber/5" id="menu">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div 
+        <div
           ref={ref}
-          className={`text-center mb-16 transition-all duration-1000 ${
+          className={`text-center mb-10 md:mb-16 transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
           }`}
         >
-          <p className="text-faded-mustard text-sm uppercase tracking-[0.2em] font-medium mb-2">
+          <p className="text-faded-mustard text-xs md:text-sm uppercase tracking-[0.2em] font-medium mb-2">
             Feasts Made Honest
           </p>
-          <h2 className="text-4xl md:text-5xl font-serif text-charcoal-gray tracking-wide">
+          <h2 className="text-3xl md:text-5xl font-serif text-charcoal-gray tracking-wide">
             Our Menu
           </h2>
         </div>
 
         {/* Single Item Display - Similar to Testimonials */}
-        <div className="relative max-w-3xl mx-auto min-h-[500px] flex items-center justify-center">
+        <div className="relative max-w-3xl mx-auto min-h-[420px] md:min-h-[500px] flex items-center justify-center">
           {menuItems.map((item, index) => (
             <div
               key={item.name}
@@ -77,15 +77,15 @@ const MenuCarousel = () => {
               <div className="w-full max-w-2xl">
                 <div className="bg-white rounded-lg shadow-card overflow-hidden border border-burnt-umber/10">
                   {/* Image placeholder */}
-                  <div className="bg-gradient-to-br from-burnt-umber/30 to-charcoal-gray/20 h-80 flex items-center justify-center">
-                    <div className="text-cream-white/30 text-8xl font-serif">{item.name[0]}</div>
+                  <div className="bg-gradient-to-br from-burnt-umber/30 to-charcoal-gray/20 h-60 md:h-80 flex items-center justify-center">
+                    <div className="text-cream-white/30 text-6xl md:text-8xl font-serif">{item.name[0]}</div>
                   </div>
 
                   {/* Content */}
-                  <div className="p-8 text-center">
-                    <h3 className="text-3xl md:text-4xl font-serif text-charcoal-gray mb-3">{item.name}</h3>
-                    <p className="text-burnt-umber text-lg font-medium mb-4">{item.description}</p>
-                    <p className="text-charcoal-gray/70 text-base leading-relaxed">
+                  <div className="p-6 md:p-8 text-center">
+                    <h3 className="text-2xl md:text-4xl font-serif text-charcoal-gray mb-2 md:mb-3">{item.name}</h3>
+                    <p className="text-burnt-umber text-base md:text-lg font-medium mb-3 md:mb-4">{item.description}</p>
+                    <p className="text-charcoal-gray/70 text-sm md:text-base leading-relaxed">
                       {item.details}
                     </p>
                   </div>
@@ -96,7 +96,7 @@ const MenuCarousel = () => {
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-center gap-4 mt-8">
+        <div className="flex justify-center gap-4 mt-6 md:mt-8">
           <Button
             variant="outline"
             size="icon"

@@ -49,8 +49,8 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 text-center px-4 md:px-6 max-w-5xl mx-auto">
         {/* Main Headline */}
-        <h1 
-          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-serif text-cream-white mb-4 md:mb-6 tracking-wide leading-tight animate-in fade-in-up duration-1000"
+        <h1
+          className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-serif text-cream-white mb-3 md:mb-6 tracking-wide leading-tight animate-in fade-in-up duration-1000"
           style={{ animationDelay: '300ms', animationFillMode: 'backwards' }}
         >
           Real Food. Real Values.
@@ -59,11 +59,11 @@ const Hero = () => {
         </h1>
 
         {/* Subtext */}
-        <p 
-          className="text-base md:text-lg lg:text-xl text-cream-white/80 mb-8 md:mb-10 tracking-wide font-light max-w-2xl mx-auto leading-relaxed animate-in fade-in-up duration-1000"
+        <p
+          className="text-sm md:text-lg lg:text-xl text-cream-white/80 mb-6 md:mb-10 tracking-wide font-light max-w-2xl mx-auto leading-relaxed animate-in fade-in-up duration-1000"
           style={{ animationDelay: '600ms', animationFillMode: 'backwards' }}
         >
-          Heritage and craftsmanship meet modern hospitality. 
+          Heritage and craftsmanship meet modern hospitality.
           <br className="hidden md:block" />
           Slow-smoked over post oak, served with heart.
         </p>

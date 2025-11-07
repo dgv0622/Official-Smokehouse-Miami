@@ -20,7 +20,7 @@ const Index = () => {
       <Navigation />
 
       {/* 1. Quote Calculator Section - FIRST */}
-      <section className="min-h-screen flex items-center justify-center py-20 md:py-32 px-4 md:px-6 bg-gradient-to-br from-burnt-umber/10 via-cream-white to-faded-mustard/5 relative" id="calculator">
+      <section className="min-h-screen flex items-center justify-center py-16 md:py-32 px-4 md:px-6 bg-gradient-to-br from-burnt-umber/10 via-cream-white to-faded-mustard/5 relative" id="calculator">
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-burnt-umber/30 rounded-full blur-[120px]" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-faded-mustard/20 rounded-full blur-[120px]" />
@@ -33,17 +33,17 @@ const Index = () => {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            <div className="bg-gradient-to-br from-amber-700 via-amber-600 to-yellow-700 text-faded-mustard p-6 md:p-12 text-center relative">
+            <div className="bg-gradient-to-br from-amber-700 via-amber-600 to-yellow-700 text-faded-mustard p-4 md:p-12 text-center relative">
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-faded-mustard/40" />
-              <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-[0.15em] uppercase mb-3 md:mb-4 font-serif">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl tracking-[0.15em] uppercase mb-2 md:mb-4 font-serif">
                 Plan Your Feast
               </h1>
-              <p className="text-sm md:text-base text-faded-mustard/90 tracking-wide font-light">
+              <p className="text-xs md:text-base text-faded-mustard/90 tracking-wide font-light">
                 Tell us about your gathering — we'll bring the fire
               </p>
             </div>
 
-            <div className="p-6 md:p-12 bg-gradient-to-b from-cream-white/95 via-cream-white/75 to-cream-white/50 backdrop-blur-[2px]">
+            <div className="p-4 md:p-12 bg-gradient-to-b from-cream-white/95 via-cream-white/75 to-cream-white/50 backdrop-blur-[2px]">
               <QuoteCalculator />
             </div>
           </div>
