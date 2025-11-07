@@ -13,9 +13,16 @@ const Footer = () => {
         <div className="grid md:grid-cols-3 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-serif text-faded-mustard">Smokehouse Miami</h3>
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.png"
+                alt="Smokehouse Miami Logo"
+                className="h-16 w-auto"
+              />
+              <h3 className="text-2xl font-serif text-faded-mustard">Smokehouse Miami</h3>
+            </div>
             <p className="text-cream-white/70 text-sm leading-relaxed">
-              Proudly smoked in Texas tradition, served with Miami heart. 
+              Proudly smoked in Texas tradition, served with Miami heart.
               Real wood, real time, real BBQ.
             </p>
             <div className="flex gap-3 text-xs text-cream-white/60">

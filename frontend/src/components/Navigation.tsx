@@ -49,11 +49,19 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <button
+            onClick={() => handleNavigation('home')}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-300"
+          >
+            <img
+              src="/logo.png"
+              alt="Smokehouse Miami Logo"
+              className="h-12 w-auto"
+            />
             <div className="text-foreground text-xl font-light tracking-[0.2em] uppercase">
               Smokehouse <span className="text-accent font-normal">Miami</span>
             </div>
-          </div>
+          </button>
 
           {/* Desktop Navigation */}
           <ul className="hidden md:flex gap-8">
