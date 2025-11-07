@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useScrollAnimation } from '@/hooks/use-scroll-animation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { API_BASE_URL } from '@/lib/api';
 
 const QuoteCalculator = () => {
   const { ref, isVisible } = useScrollAnimation();
@@ -17,19 +18,36 @@ const QuoteCalculator = () => {
     phone: ''
   });
   const [showResults, setShowResults] = useState(false);
+  const [calendlyUrl, setCalendlyUrl] = useState('');
 
-  const totalSteps = 5;
+  const totalSteps = 6;
   const progress = (currentStep / totalSteps) * 100;
 
   const calculatePrice = () => {
     const guests = parseInt(formData.guestCount) || 50;
     let pricePerPerson = 25;
-    
+
     if (formData.serviceLevel === 'standard') pricePerPerson = 40;
     if (formData.serviceLevel === 'premium') pricePerPerson = 60;
-    
+
     return guests * pricePerPerson;
   };
+
+  // Fetch Calendly URL on component mount
+  useEffect(() => {
+    const fetchCalendlyUrl = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/config/calendly-url`);
+        const data = await response.json();
+        if (data.calendly_url) {
+          setCalendlyUrl(data.calendly_url);
+        }
+      } catch (error) {
+        console.error('Error fetching Calendly URL:', error);
+      }
+    };
+    fetchCalendlyUrl();
+  }, []);
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -119,7 +137,7 @@ const QuoteCalculator = () => {
         {/* Step 1: Event Type */}
         {currentStep === 1 && (
           <div className="space-y-4 md:space-y-6 animate-fade-in-up">
-            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 1 of 5</div>
+            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 1 of 6</div>
             <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">What type of event are you planning?</h2>
             <div className="grid grid-cols-2 gap-3 md:gap-4">
               {['corporate', 'wedding', 'private', 'other'].map((type) => (
@@ -140,7 +158,7 @@ const QuoteCalculator = () => {
         {/* Step 2: Guest Count */}
         {currentStep === 2 && (
           <div className="space-y-4 md:space-y-6 animate-fade-in-up">
-            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 2 of 5</div>
+            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 2 of 6</div>
             <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">How many guests are you expecting?</h2>
             <Input
               type="number"
@@ -156,7 +174,7 @@ const QuoteCalculator = () => {
         {/* Step 3: Service Level */}
         {currentStep === 3 && (
           <div className="space-y-4 md:space-y-6 animate-fade-in-up">
-            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 3 of 5</div>
+            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 3 of 6</div>
             <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">What level of service do you prefer?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               {[
@@ -182,7 +200,7 @@ const QuoteCalculator = () => {
         {/* Step 4: Menu Notes */}
         {currentStep === 4 && (
           <div className="space-y-4 md:space-y-6 animate-fade-in-up">
-            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 4 of 5</div>
+            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 4 of 6</div>
             <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">Any special menu requirements?</h2>
             <Textarea
               placeholder="Dietary restrictions, preferred meats, special requests..."
@@ -197,7 +215,7 @@ const QuoteCalculator = () => {
         {/* Step 5: Contact Info */}
         {currentStep === 5 && (
           <div className="space-y-4 md:space-y-6 animate-fade-in-up">
-            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 5 of 5</div>
+            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Question 5 of 6</div>
             <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">How can we reach you?</h2>
             <div className="space-y-3 md:space-y-4">
               <Input
@@ -222,6 +240,38 @@ const QuoteCalculator = () => {
                 className="text-base md:text-lg p-4 md:p-6 border-2 focus:border-faded-mustard bg-gradient-to-br from-amber-700/10 to-amber-600/10 text-foreground placeholder:text-foreground/40"
               />
             </div>
+          </div>
+        )}
+
+        {/* Step 6: Calendly Booking */}
+        {currentStep === 6 && (
+          <div className="space-y-4 md:space-y-6 animate-fade-in-up">
+            <div className="text-accent text-xs font-semibold tracking-widest uppercase mb-2">Step 6 of 6</div>
+            <h2 className="text-xl md:text-2xl font-light text-foreground mb-4 md:mb-6">Book Your Planning Call</h2>
+            <p className="text-sm md:text-base text-foreground/70 mb-4">
+              Let's schedule a quick consultation to finalize your event details and answer any questions you may have.
+            </p>
+
+            {calendlyUrl ? (
+              <div className="bg-white rounded-lg overflow-hidden border-2 border-accent/20" style={{ minHeight: '630px' }}>
+                <iframe
+                  src={`${calendlyUrl}?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}&hide_event_type_details=1&hide_gdpr_banner=1`}
+                  width="100%"
+                  height="630"
+                  frameBorder="0"
+                  title="Schedule Consultation"
+                  className="calendly-inline-widget"
+                />
+              </div>
+            ) : (
+              <div className="bg-black/40 border border-accent/20 rounded-lg p-6 text-center">
+                <p className="text-foreground/60">Loading booking calendar...</p>
+              </div>
+            )}
+
+            <p className="text-xs md:text-sm text-foreground/60 text-center">
+              After booking, you'll see your price estimate on the next screen.
+            </p>
           </div>
         )}
 

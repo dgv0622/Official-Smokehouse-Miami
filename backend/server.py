@@ -285,6 +285,12 @@ async def update_n8n_config(config_data: N8nConfigUpdate):
     logger.info("Updated n8n webhook URL")
     return {"message": "Configuration updated successfully", "webhook_url": config_data.webhook_url}
 
+@api_router.get("/config/calendly-url")
+async def get_calendly_url():
+    """Get the Calendly booking URL from environment variables"""
+    calendly_url = os.environ.get('CALENDLY_BOOKING_URL', '')
+    return {"calendly_url": calendly_url}
+
 # Include the router in the main app
 app.include_router(api_router)
 
