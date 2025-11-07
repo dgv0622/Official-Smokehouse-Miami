@@ -108,11 +108,8 @@ const QuoteCalculator = () => {
             </div>
             
             <p className="text-foreground/60 mb-6 text-sm">This is an estimate based on your responses. Final pricing will be confirmed after consultation.</p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-gradient-gold hover:shadow-glow transition-all duration-300 hover:-translate-y-1 text-black px-8 py-6 text-sm tracking-widest uppercase font-semibold">
-                Contact Us to Book
-              </Button>
+
+            <div className="flex justify-center">
               <Button onClick={restartQuote} variant="outline" className="border-2 border-accent text-accent hover:bg-accent/10 px-8 py-6 text-sm tracking-widest uppercase">
                 Start Over
               </Button>
